@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complete Sensation – Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --crimson: #B01020;
+    --crimson-deep: #7A0010;
+    --crimson-bright: #D42030;
+    --crimson-glow: #FF3044;
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --white: #FFFFFF;
+    --off-white: #FAF7F5;
+    --cream: #F3EDE8;
+    --dark: #1A0505;
+    --dark2: #2A0A0A;
+    --dark3: #120303;
+    --gray: #8A7A7A;
+    --gray-light: #B0A0A0;
+    --light-gray: #E8DFDF;
+    --success: #28A87A;
+    --success-light: #4FD1A5;
+    --warning: #F5A623;
+    --info: #5088D4;
+    --info-light: #7EB3FF;
+    --danger: #FF5B5B;
+    --sidebar-w: 272px;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--dark);
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND ─────────────────────────────── */
+  .bg-scene {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 70% 20%, rgba(176,16,32,0.45) 0%, transparent 65%),
+      radial-gradient(ellipse 60% 80% at 10% 80%, rgba(122,0,16,0.40) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 90% 85%, rgba(212,32,48,0.20) 0%, transparent 55%),
+      linear-gradient(160deg, #120303 0%, #1A0505 40%, #2A0808 70%, #120303 100%);
+  }
+  .bg-scene::before {
+    content:''; position:absolute; inset:0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(176,16,32,0.03) 60px, rgba(176,16,32,0.03) 61px),
+      repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(176,16,32,0.03) 60px, rgba(176,16,32,0.03) 61px);
+  }
+
+  .orb { position:fixed; border-radius:50%; filter:blur(90px); pointer-events:none; z-index:0; animation: orbFloat 10s ease-in-out infinite; }
+  .orb1 { width:500px; height:500px; background:radial-gradient(circle, rgba(176,16,32,0.4),transparent 70%); top:-150px; right:5%; animation-delay:0s; }
+  .orb2 { width:350px; height:350px; background:radial-gradient(circle, rgba(212,32,48,0.3),transparent 70%); bottom:50px; left:10%; animation-delay:4s; }
+  .orb3 { width:280px; height:280px; background:radial-gradient(circle, rgba(201,168,76,0.12),transparent 70%); top:60%; right:30%; animation-delay:7s; }
+
+  @keyframes orbFloat { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-25px) scale(1.04)} }
+
+  /* ── LAYOUT ─────────────────────────────────── */
+  .layout { display:flex; min-height:100vh; position:relative; z-index:1; }
+
+  /* ── SIDEBAR ────────────────────────────────── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: linear-gradient(180deg, rgba(18,3,3,0.98) 0%, rgba(26,5,5,0.98) 100%);
+    border-right: 1px solid rgba(176,16,32,0.25);
+    display: flex; flex-direction: column;
+    position: fixed; left:0; top:0; bottom:0; z-index:100;
+    backdrop-filter: blur(20px);
+    box-shadow: 4px 0 48px rgba(176,16,32,0.12);
+  }
+
+  .sidebar-logo {
+    padding: 26px 22px 18px;
+    border-bottom: 1px solid rgba(176,16,32,0.2);
+  }
+  .logo-row { display:flex; align-items:center; gap:13px; margin-bottom:10px; }
+  .logo-mark {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, var(--crimson), var(--crimson-deep));
+    border-radius: 11px; flex-shrink:0;
+    display: flex; align-items:center; justify-content:center;
+    font-family: 'Bebas Neue', sans-serif; font-size: 19px; letter-spacing: 2px;
+    box-shadow: 0 6px 20px rgba(176,16,32,0.5), inset 0 1px 0 rgba(255,255,255,0.12);
+    position:relative; overflow:hidden;
+  }
+  .logo-mark::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(255,255,255,0.18) 0%,transparent 50%); }
+  .logo-text .logo-name { font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:3px; color:var(--white); line-height:1; }
+  .logo-text .logo-sub { font-size:9px; color:var(--gold); letter-spacing:2.5px; text-transform:uppercase; margin-top:3px; }
+
+  .admin-badge {
+    display:inline-flex; align-items:center; gap:6px;
+    background:linear-gradient(135deg,rgba(176,16,32,0.3),rgba(176,16,32,0.15));
+    border:1px solid rgba(176,16,32,0.5);
+    border-radius:6px; padding:5px 10px;
+    font-size:9px; letter-spacing:2px; text-transform:uppercase;
+    color:var(--crimson-bright); font-weight:700;
+  }
+  .admin-badge::before { content:'◆'; font-size:7px; }
+
+  .sidebar-nav { flex:1; padding:16px 0; overflow-y:auto; }
+  .nav-section { margin-bottom:4px; }
+  .nav-label { font-size:8.5px; letter-spacing:3px; text-transform:uppercase; color:rgba(138,122,122,0.6); padding:10px 22px 4px; }
+  .nav-item {
+    display:flex; align-items:center; gap:11px;
+    padding:10px 22px; cursor:pointer; transition:all 0.2s;
+    font-size:13px; font-weight:500; color:rgba(255,255,255,0.5);
+    border-left:2px solid transparent; position:relative;
+  }
+  .nav-item:hover { color:rgba(255,255,255,0.85); background:rgba(176,16,32,0.08); }
+  .nav-item.active { color:var(--white); background:rgba(176,16,32,0.14); border-left-color:var(--crimson-bright); }
+  .nav-item .icon { width:18px; text-align:center; font-size:14px; opacity:0.8; }
+  .nav-item.active .icon { opacity:1; }
+  .nav-badge {
+    margin-left:auto; background:var(--crimson); color:#fff;
+    font-size:9px; font-weight:700; padding:2px 6px; border-radius:8px;
+    min-width:18px; text-align:center;
+  }
+  .nav-badge.gold { background:linear-gradient(135deg,var(--gold),#A8872A); color:var(--dark); }
+
+  .sidebar-footer {
+    padding:16px 22px; border-top:1px solid rgba(176,16,32,0.2);
+  }
+  .admin-user {
+    display:flex; align-items:center; gap:11px;
+    background:rgba(255,255,255,0.04); border:1px solid rgba(176,16,32,0.2);
+    border-radius:10px; padding:11px 13px;
+  }
+  .admin-avatar {
+    width:34px; height:34px; border-radius:8px; flex-shrink:0;
+    background:linear-gradient(135deg,var(--crimson),var(--crimson-deep));
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:12px;
+    box-shadow:0 3px 10px rgba(176,16,32,0.4);
+  }
+  .admin-info .admin-name { font-size:12.5px; font-weight:600; line-height:1; }
+  .admin-info .admin-role { font-size:10px; color:var(--gold); margin-top:3px; letter-spacing:0.5px; }
+
+  /* ── MAIN ───────────────────────────────────── */
+  .main { margin-left: var(--sidebar-w); flex:1; min-height:100vh; }
+
+  /* ── TOPBAR ─────────────────────────────────── */
+  .topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 32px;
+    background:rgba(18,3,3,0.7);
+    border-bottom:1px solid rgba(176,16,32,0.2);
+    backdrop-filter:blur(20px);
+    position:sticky; top:0; z-index:50;
+  }
+  .topbar-left h1 { font-family:'Cormorant Garamond',serif; font-size:24px; font-weight:600; letter-spacing:0.5px; background:linear-gradient(135deg,#fff,rgba(255,255,255,0.65)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .topbar-left p { font-size:11.5px; color:var(--gray); margin-top:2px; }
+  .topbar-right { display:flex; align-items:center; gap:14px; }
+  .topbar-search {
+    display:flex; align-items:center; gap:8px;
+    background:rgba(255,255,255,0.05); border:1px solid rgba(176,16,32,0.2);
+    border-radius:10px; padding:8px 14px; width:220px;
+  }
+  .topbar-search input { background:none; border:none; outline:none; color:var(--white); font-size:13px; font-family:'DM Sans',sans-serif; width:100%; }
+  .topbar-search input::placeholder { color:rgba(255,255,255,0.3); }
+  .topbar-search .search-icon { color:rgba(255,255,255,0.3); font-size:13px; }
+  .notif-btn {
+    width:36px; height:36px; border-radius:9px;
+    background:rgba(176,16,32,0.12); border:1px solid rgba(176,16,32,0.25);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-size:15px; position:relative; transition:all 0.2s;
+  }
+  .notif-btn:hover { background:rgba(176,16,32,0.25); }
+  .notif-dot { position:absolute; top:5px; right:6px; width:7px; height:7px; background:var(--crimson-bright); border-radius:50%; animation:pulse 2s infinite; }
+  .sys-status { display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--success-light); background:rgba(40,168,122,0.1); border:1px solid rgba(40,168,122,0.2); padding:5px 12px; border-radius:16px; }
+  .sys-status::before { content:'●'; font-size:7px; animation:pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
+  .topbar-avatar { width:36px; height:36px; border-radius:9px; background:linear-gradient(135deg,var(--crimson),var(--crimson-deep)); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; cursor:pointer; box-shadow:0 3px 10px rgba(176,16,32,0.4); }
+
+  /* ── CONTENT ─────────────────────────────────── */
+  .content { padding:26px 32px; }
+  .section { display:none; }
+  .section.active { display:block; animation:fadeIn 0.25s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ── SECTION HEADINGS ───────────────────────── */
+  .sec-heading { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
+  .sec-title { font-family:'Cormorant Garamond',serif; font-size:23px; font-weight:600; letter-spacing:0.3px; }
+  .sec-sub { font-size:12px; color:var(--gray); margin-top:3px; }
+  .sec-actions { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+
+  /* ── BUTTONS ────────────────────────────────── */
+  .btn {
+    display:inline-flex; align-items:center; gap:7px;
+    padding:9px 18px; border-radius:9px; font-size:12.5px; font-weight:600;
+    cursor:pointer; border:none; transition:all 0.2s; font-family:'DM Sans',sans-serif;
+    white-space:nowrap;
+  }
+  .btn-primary { background:linear-gradient(135deg,var(--crimson),var(--crimson-deep)); color:#fff; box-shadow:0 4px 14px rgba(176,16,32,0.4); }
+  .btn-primary:hover { box-shadow:0 6px 22px rgba(176,16,32,0.6); transform:translateY(-1px); }
+  .btn-outline { background:transparent; color:var(--white); border:1px solid rgba(176,16,32,0.35); }
+  .btn-outline:hover { background:rgba(176,16,32,0.12); border-color:var(--crimson); }
+  .btn-gold { background:linear-gradient(135deg,var(--gold),#A8872A); color:var(--dark); box-shadow:0 4px 14px rgba(201,168,76,0.3); font-weight:700; }
+  .btn-gold:hover { box-shadow:0 6px 22px rgba(201,168,76,0.5); transform:translateY(-1px); }
+  .btn-green { background:linear-gradient(135deg,var(--success),#1A8A5A); color:#fff; box-shadow:0 4px 14px rgba(40,168,122,0.3); }
+  .btn-green:hover { box-shadow:0 6px 22px rgba(40,168,122,0.5); transform:translateY(-1px); }
+  .btn-danger { background:linear-gradient(135deg,#C03030,#8A1010); color:#fff; box-shadow:0 4px 14px rgba(192,48,48,0.3); }
+  .btn-danger:hover { box-shadow:0 6px 22px rgba(192,48,48,0.5); transform:translateY(-1px); }
+  .btn-sm { padding:7px 13px; font-size:11.5px; }
+  .btn-xs { padding:5px 10px; font-size:11px; }
+  .btn-icon { padding:8px; width:34px; height:34px; justify-content:center; }
+
+  /* ── STAT CARDS ─────────────────────────────── */
+  .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+  .stats-grid-5 { grid-template-columns:repeat(5,1fr); }
+  .stats-grid-3 { grid-template-columns:repeat(3,1fr); }
+  .stat-card {
+    background:linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015));
+    border:1px solid rgba(176,16,32,0.22);
+    border-radius:14px; padding:20px;
+    position:relative; overflow:hidden;
+    transition:transform 0.2s, box-shadow 0.2s; cursor:default;
+  }
+  .stat-card:hover { transform:translateY(-2px); box-shadow:0 10px 36px rgba(176,16,32,0.18); }
+  .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--crimson),var(--crimson-bright),transparent); }
+  .stat-card.gold-c::before { background:linear-gradient(90deg,var(--gold),var(--gold-light),transparent); }
+  .stat-card.green-c::before { background:linear-gradient(90deg,var(--success),var(--success-light),transparent); }
+  .stat-card.blue-c::before { background:linear-gradient(90deg,var(--info),var(--info-light),transparent); }
+  .stat-card.warn-c::before { background:linear-gradient(90deg,var(--warning),#FFD070,transparent); }
+  .stat-icon { width:40px; height:40px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:17px; margin-bottom:12px; }
+  .stat-icon.red { background:rgba(176,16,32,0.18); }
+  .stat-icon.gold { background:rgba(201,168,76,0.14); }
+  .stat-icon.green { background:rgba(40,168,122,0.14); }
+  .stat-icon.blue { background:rgba(80,136,212,0.14); }
+  .stat-icon.warn { background:rgba(245,166,35,0.14); }
+  .stat-value { font-family:'Bebas Neue'; font-size:32px; letter-spacing:1px; line-height:1; }
+  .stat-value.gold-text { color:var(--gold-light); }
+  .stat-value.green-text { color:var(--success-light); }
+  .stat-value.blue-text { color:var(--info-light); }
+  .stat-value.warn-text { color:var(--warning); }
+  .stat-value.red-text { color:#FF7070; }
+  .stat-label { font-size:11.5px; color:var(--gray); margin-top:4px; }
+  .stat-change { font-size:10.5px; margin-top:7px; display:flex; align-items:center; gap:4px; }
+  .stat-change.up { color:var(--success-light); }
+  .stat-change.down { color:var(--danger); }
+  .stat-change.neutral { color:var(--gray); }
+
+  /* ── CARDS ───────────────────────────────────── */
+  .card {
+    background:linear-gradient(135deg,rgba(255,255,255,0.045),rgba(255,255,255,0.01));
+    border:1px solid rgba(176,16,32,0.18); border-radius:14px; padding:20px;
+  }
+  .card-title { font-family:'Cormorant Garamond',serif; font-size:16px; font-weight:600; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .card-title-text { display:flex; align-items:center; gap:8px; }
+  .card + .card { margin-top:18px; }
+  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:22px; }
+  .three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; margin-bottom:22px; }
+  .col-3-1 { display:grid; grid-template-columns:3fr 1fr; gap:18px; margin-bottom:22px; }
+  .col-1-2 { display:grid; grid-template-columns:1fr 2fr; gap:18px; margin-bottom:22px; }
+
+  /* ── TABLES ─────────────────────────────────── */
+  .table-wrap { background:linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.01)); border:1px solid rgba(176,16,32,0.18); border-radius:14px; overflow:hidden; margin-bottom:22px; }
+  .table-header { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid rgba(176,16,32,0.15); flex-wrap:wrap; gap:10px; }
+  .table-header-title { font-family:'Cormorant Garamond',serif; font-size:16px; font-weight:600; }
+  .table-filters { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  table { width:100%; border-collapse:collapse; }
+  thead tr { background:rgba(176,16,32,0.08); }
+  th { padding:11px 16px; text-align:left; font-size:10px; letter-spacing:2px; text-transform:uppercase; color:rgba(138,122,122,0.9); font-weight:600; white-space:nowrap; }
+  td { padding:12px 16px; font-size:13px; color:rgba(255,255,255,0.8); border-top:1px solid rgba(176,16,32,0.08); vertical-align:middle; }
+  tr:hover td { background:rgba(176,16,32,0.05); }
+  .td-mono { font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--gray-light); }
+
+  /* ── BADGES ─────────────────────────────────── */
+  .badge { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:5px; font-size:10.5px; font-weight:600; letter-spacing:0.4px; white-space:nowrap; }
+  .badge-green { background:rgba(40,168,122,0.15); color:var(--success-light); }
+  .badge-red { background:rgba(176,16,32,0.2); color:#FF7070; }
+  .badge-gold { background:rgba(201,168,76,0.15); color:var(--gold-light); }
+  .badge-blue { background:rgba(80,136,212,0.15); color:var(--info-light); }
+  .badge-gray { background:rgba(255,255,255,0.08); color:var(--gray-light); }
+  .badge-warn { background:rgba(245,166,35,0.15); color:var(--warning); }
+  .badge-purple { background:rgba(150,80,220,0.15); color:#C49AFF; }
+
+  /* ── FORMS ───────────────────────────────────── */
+  .form-group { margin-bottom:14px; }
+  .form-label { font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--gray); margin-bottom:6px; display:block; }
+  .form-input, .form-select, .form-textarea {
+    width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(176,16,32,0.25);
+    border-radius:9px; padding:10px 14px; font-size:13px; color:var(--white);
+    font-family:'DM Sans',sans-serif; transition:border-color 0.2s; outline:none;
+  }
+  .form-textarea { resize:vertical; min-height:80px; }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color:var(--crimson); box-shadow:0 0 0 3px rgba(176,16,32,0.12); }
+  .form-input::placeholder { color:rgba(255,255,255,0.25); }
+  .form-select option { background:#2A0A0A; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .form-row-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+
+  /* ── SEARCH BAR ──────────────────────────────── */
+  .search-bar {
+    display:flex; align-items:center; gap:8px;
+    background:rgba(0,0,0,0.25); border:1px solid rgba(176,16,32,0.22);
+    border-radius:9px; padding:9px 13px;
+  }
+  .search-bar input { background:none; border:none; outline:none; color:var(--white); font-size:13px; font-family:'DM Sans',sans-serif; flex:1; min-width:140px; }
+  .search-bar input::placeholder { color:rgba(255,255,255,0.28); }
+
+  /* ── FILTER SELECT ───────────────────────────── */
+  .filter-select {
+    background:rgba(0,0,0,0.25); border:1px solid rgba(176,16,32,0.22);
+    border-radius:9px; padding:9px 13px; color:var(--white); font-size:12.5px;
+    font-family:'DM Sans',sans-serif; outline:none; cursor:pointer;
+  }
+  .filter-select option { background:#1A0505; }
+
+  /* ── TOGGLE ──────────────────────────────────── */
+  .toggle-wrap { display:flex; align-items:center; gap:10px; }
+  .toggle { position:relative; width:38px; height:20px; cursor:pointer; }
+  .toggle input { opacity:0; width:0; height:0; }
+  .toggle-slider { position:absolute; inset:0; background:rgba(255,255,255,0.12); border-radius:20px; transition:0.3s; }
+  .toggle-slider::before { content:''; position:absolute; height:14px; width:14px; left:3px; bottom:3px; background:rgba(255,255,255,0.5); border-radius:50%; transition:0.3s; }
+  .toggle input:checked + .toggle-slider { background:var(--crimson); }
+  .toggle input:checked + .toggle-slider::before { transform:translateX(18px); background:#fff; }
+  .toggle-label { font-size:13px; color:rgba(255,255,255,0.75); }
+
+  /* ── CHART BARS ──────────────────────────────── */
+  .chart-area { position:relative; }
+  .chart-bars { display:flex; align-items:flex-end; gap:6px; height:160px; padding-bottom:24px; }
+  .bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; height:100%; justify-content:flex-end; }
+  .bar { width:100%; background:linear-gradient(180deg,var(--crimson-bright),var(--crimson-deep)); border-radius:5px 5px 0 0; transition:height 0.8s cubic-bezier(.25,.46,.45,.94); min-height:4px; }
+  .bar-label { font-size:10px; color:var(--gray); position:absolute; bottom:0; }
+  .bar-wrap { position:relative; }
+  .bar-val { font-size:9px; color:var(--crimson-bright); font-family:'JetBrains Mono',monospace; margin-bottom:2px; }
+
+  /* ── DONUT CHART ─────────────────────────────── */
+  .donut-wrap { display:flex; align-items:center; gap:20px; }
+  .donut-svg { flex-shrink:0; }
+  .donut-legend { flex:1; }
+  .donut-item { display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:12px; }
+  .donut-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+
+  /* ── PROGRESS BAR ────────────────────────────── */
+  .progress-bar { height:6px; background:rgba(255,255,255,0.08); border-radius:3px; overflow:hidden; }
+  .progress-fill { height:100%; border-radius:3px; transition:width 0.8s ease; }
+  .progress-fill.red { background:linear-gradient(90deg,var(--crimson),var(--crimson-bright)); }
+  .progress-fill.gold { background:linear-gradient(90deg,var(--gold),var(--gold-light)); }
+  .progress-fill.green { background:linear-gradient(90deg,var(--success),var(--success-light)); }
+  .progress-fill.blue { background:linear-gradient(90deg,var(--info),var(--info-light)); }
+
+  /* ── AVATAR ──────────────────────────────────── */
+  .user-avatar {
+    width:32px; height:32px; border-radius:8px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:11px; font-family:'DM Sans',sans-serif;
+  }
+
+  /* ── ACTIVITY FEED ───────────────────────────── */
+  .activity-feed { display:flex; flex-direction:column; gap:0; }
+  .activity-item { display:flex; align-items:flex-start; gap:13px; padding:12px 0; border-bottom:1px solid rgba(176,16,32,0.08); }
+  .activity-item:last-child { border-bottom:none; }
+  .activity-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; margin-top:1px; }
+  .activity-body { flex:1; }
+  .activity-title { font-size:13px; font-weight:500; line-height:1.3; }
+  .activity-title b { color:var(--white); }
+  .activity-time { font-size:10.5px; color:var(--gray); margin-top:3px; }
+
+  /* ── AFFILIATE TIER BADGE ────────────────────── */
+  .tier-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:5px; font-size:10.5px; font-weight:700; letter-spacing:0.5px; }
+  .tier-silver { background:rgba(180,180,200,0.15); color:#C8C8D8; }
+  .tier-gold { background:rgba(201,168,76,0.15); color:var(--gold-light); }
+  .tier-platinum { background:rgba(80,160,220,0.15); color:#A0D4FF; }
+
+  /* ── USER MINI CARD ──────────────────────────── */
+  .user-mini { display:flex; align-items:center; gap:10px; }
+  .user-mini-name { font-size:13px; font-weight:500; line-height:1; }
+  .user-mini-id { font-size:10.5px; color:var(--gray); font-family:'JetBrains Mono',monospace; margin-top:2px; }
+
+  /* ── TOAST ───────────────────────────────────── */
+  .toast {
+    position:fixed; bottom:24px; right:24px; z-index:400;
+    background:linear-gradient(135deg,rgba(30,100,70,0.97),rgba(20,70,50,0.97));
+    color:#fff; padding:13px 18px; border-radius:11px;
+    display:flex; align-items:center; gap:10px;
+    font-size:13px; font-weight:500;
+    transform:translateX(120%); transition:transform 0.4s cubic-bezier(.34,1.56,.64,1);
+    box-shadow:0 8px 32px rgba(40,168,122,0.3); max-width:320px;
+    border:1px solid rgba(40,168,122,0.3);
+  }
+  .toast.show { transform:translateX(0); }
+  .toast.error { background:linear-gradient(135deg,rgba(176,16,32,0.97),rgba(122,0,16,0.97)); box-shadow:0 8px 32px rgba(176,16,32,0.4); border-color:rgba(176,16,32,0.5); }
+  .toast.warn { background:linear-gradient(135deg,rgba(160,100,0,0.97),rgba(100,60,0,0.97)); box-shadow:0 8px 32px rgba(245,166,35,0.3); border-color:rgba(245,166,35,0.3); }
+  .toast-icon { font-size:17px; }
+
+  /* ── MODAL ───────────────────────────────────── */
+  .modal-overlay {
+    position:fixed; inset:0; z-index:300;
+    background:rgba(0,0,0,0.7); backdrop-filter:blur(6px);
+    display:flex; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition:opacity 0.25s;
+  }
+  .modal-overlay.show { opacity:1; pointer-events:all; }
+  .modal {
+    background:linear-gradient(160deg,#1E0606,#2A0A0A);
+    border:1px solid rgba(176,16,32,0.35); border-radius:16px;
+    padding:28px; width:92%; max-width:520px; position:relative;
+    box-shadow:0 24px 80px rgba(0,0,0,0.7);
+    transform:scale(0.94) translateY(12px); transition:transform 0.3s;
+  }
+  .modal-overlay.show .modal { transform:scale(1) translateY(0); }
+  .modal-lg { max-width:700px; }
+  .modal-close {
+    position:absolute; top:14px; right:16px;
+    background:rgba(255,255,255,0.08); border:none; color:var(--gray); cursor:pointer;
+    font-size:18px; width:30px; height:30px; border-radius:7px;
+    display:flex; align-items:center; justify-content:center; transition:all 0.2s;
+  }
+  .modal-close:hover { background:rgba(176,16,32,0.3); color:#fff; }
+  .modal-title { font-family:'Cormorant Garamond',serif; font-size:21px; font-weight:600; margin-bottom:4px; }
+  .modal-sub { font-size:12.5px; color:var(--gray); margin-bottom:20px; }
+
+  /* ── TABS ────────────────────────────────────── */
+  .tabs { display:flex; gap:2px; background:rgba(0,0,0,0.2); border-radius:10px; padding:4px; margin-bottom:22px; border:1px solid rgba(176,16,32,0.15); width:fit-content; }
+  .tab { padding:7px 16px; border-radius:7px; font-size:12.5px; font-weight:500; cursor:pointer; color:rgba(255,255,255,0.5); transition:all 0.2s; }
+  .tab.active { background:rgba(176,16,32,0.25); color:var(--white); box-shadow:0 2px 8px rgba(176,16,32,0.2); }
+  .tab:hover:not(.active) { color:rgba(255,255,255,0.75); }
+
+  /* ── ALERT BANNER ────────────────────────────── */
+  .alert { display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:10px; margin-bottom:18px; font-size:13px; }
+  .alert-warn { background:rgba(245,166,35,0.1); border:1px solid rgba(245,166,35,0.25); color:var(--warning); }
+  .alert-info { background:rgba(80,136,212,0.1); border:1px solid rgba(80,136,212,0.25); color:var(--info-light); }
+  .alert-success { background:rgba(40,168,122,0.1); border:1px solid rgba(40,168,122,0.25); color:var(--success-light); }
+  .alert-danger { background:rgba(176,16,32,0.12); border:1px solid rgba(176,16,32,0.35); color:#FF7070; }
+
+  /* ── INLINE STAT ROW ─────────────────────────── */
+  .inline-stats { display:flex; gap:24px; flex-wrap:wrap; }
+  .inline-stat { text-align:center; }
+  .inline-stat-val { font-family:'Bebas Neue'; font-size:22px; letter-spacing:1px; line-height:1; }
+  .inline-stat-lbl { font-size:10px; color:var(--gray); margin-top:2px; letter-spacing:0.5px; }
+
+  /* ── SCROLLBAR ───────────────────────────────── */
+  ::-webkit-scrollbar { width:4px; height:4px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:rgba(176,16,32,0.3); border-radius:4px; }
+
+  /* ── DIVIDER ─────────────────────────────────── */
+  .divider { height:1px; background:rgba(176,16,32,0.15); margin:18px 0; }
+
+  /* ── HIGHLIGHT BOX ───────────────────────────── */
+  .highlight-box { background:rgba(176,16,32,0.08); border:1px solid rgba(176,16,32,0.2); border-radius:10px; padding:13px 16px; }
+  .highlight-box.gold { background:rgba(201,168,76,0.07); border-color:rgba(201,168,76,0.2); }
+  .highlight-box.green { background:rgba(40,168,122,0.07); border-color:rgba(40,168,122,0.2); }
+
+  /* ── RESPONSIVE ──────────────────────────────── */
+  @media(max-width:1200px) { .stats-grid-5 { grid-template-columns:repeat(3,1fr); } }
+  @media(max-width:960px) {
+    .stats-grid { grid-template-columns:repeat(2,1fr); }
+    .three-col,.two-col,.col-3-1,.col-1-2,.form-row,.form-row-3 { grid-template-columns:1fr; }
+  }
+
+  /* ── SPECIAL COMPONENTS ──────────────────────── */
+  .payout-req-card {
+    display:flex; align-items:center; gap:14px; padding:14px 16px;
+    background:rgba(255,255,255,0.025); border:1px solid rgba(176,16,32,0.15);
+    border-radius:10px; margin-bottom:10px; transition:all 0.2s;
+  }
+  .payout-req-card:hover { background:rgba(176,16,32,0.06); border-color:rgba(176,16,32,0.25); }
+  .payout-req-body { flex:1; min-width:0; }
+  .payout-req-name { font-size:13.5px; font-weight:600; }
+  .payout-req-meta { font-size:11px; color:var(--gray); margin-top:2px; }
+  .payout-req-amount { font-family:'Bebas Neue'; font-size:22px; color:var(--gold-light); flex-shrink:0; }
+  .payout-req-actions { display:flex; gap:6px; flex-shrink:0; }
+
+  .product-card {
+    background:rgba(255,255,255,0.03); border:1px solid rgba(176,16,32,0.18);
+    border-radius:12px; padding:16px; transition:all 0.2s;
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .product-card:hover { border-color:rgba(176,16,32,0.35); background:rgba(176,16,32,0.06); }
+  .product-thumb { height:90px; background:linear-gradient(135deg,rgba(176,16,32,0.2),rgba(122,0,16,0.15)); border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:32px; }
+  .product-name { font-weight:600; font-size:14px; }
+  .product-sku { font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--gray); }
+  .products-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+
+  .comm-rate-card { padding:16px; border-radius:10px; text-align:center; border:1px solid; }
+  .comm-rate-card.silver { background:rgba(180,180,200,0.07); border-color:rgba(180,180,200,0.2); }
+  .comm-rate-card.gold-t { background:rgba(201,168,76,0.1); border-color:rgba(201,168,76,0.3); }
+  .comm-rate-card.platinum { background:rgba(80,160,220,0.08); border-color:rgba(80,160,220,0.25); }
+  .comm-rate-pct { font-family:'Bebas Neue'; font-size:40px; letter-spacing:1px; }
+
+  .map-placeholder { background:rgba(0,0,0,0.2); border:1px solid rgba(176,16,32,0.15); border-radius:10px; height:200px; display:flex; align-items:center; justify-content:center; color:var(--gray); font-size:13px; gap:8px; }
+
+  .notif-item { display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-bottom:1px solid rgba(176,16,32,0.08); }
+  .notif-item:last-child { border-bottom:none; }
+  .notif-dot-big { width:10px; height:10px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+
+  .action-row { display:flex; align-items:center; gap:8px; }
+</style>
+</head>
+<body>
+
+<div class="bg-scene"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<div class="layout">
+
+  <!-- ═══════════════════ SIDEBAR ═══════════════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-row">
+        <div class="logo-mark">CS</div>
+        <div class="logo-text">
+          <div class="logo-name">Complete Sensation</div>
+          <div class="logo-sub">Admin Console</div>
+        </div>
+      </div>
+      <div class="admin-badge">Super Admin Access</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-label">Overview</div>
+        <div class="nav-item active" onclick="showSection('overview',this)">
+          <span class="icon">🏠</span> Dashboard Overview
+        </div>
+        <div class="nav-item" onclick="showSection('analytics',this)">
+          <span class="icon">📈</span> Analytics & Reports
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Affiliate Management</div>
+        <div class="nav-item" onclick="showSection('affiliates',this)">
+          <span class="icon">👥</span> All Affiliates
+        </div>
+        <div class="nav-item" onclick="showSection('applications',this)">
+          <span class="icon">📝</span> Applications
+          <span class="nav-badge">7</span>
+        </div>
+        <div class="nav-item" onclick="showSection('network',this)">
+          <span class="icon">🕸️</span> Network Map
+        </div>
+        <div class="nav-item" onclick="showSection('tiers',this)">
+          <span class="icon">🏆</span> Tier Management
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Finance</div>
+        <div class="nav-item" onclick="showSection('payouts',this)">
+          <span class="icon">💸</span> Payout Requests
+          <span class="nav-badge">12</span>
+        </div>
+        <div class="nav-item" onclick="showSection('commissions',this)">
+          <span class="icon">💰</span> Commission Ledger
+        </div>
+        <div class="nav-item" onclick="showSection('transactions',this)">
+          <span class="icon">📋</span> Transactions
+        </div>
+        <div class="nav-item" onclick="showSection('orders',this)">
+          <span class="icon">🛒</span> Sales & Orders
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">Catalog</div>
+        <div class="nav-item" onclick="showSection('products',this)">
+          <span class="icon">🧴</span> Products
+        </div>
+        <div class="nav-item" onclick="showSection('links',this)">
+          <span class="icon">🔗</span> Affiliate Links
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-label">System</div>
+        <div class="nav-item" onclick="showSection('notifications',this)">
+          <span class="icon">🔔</span> Notifications
+          <span class="nav-badge gold">3</span>
+        </div>
+        <div class="nav-item" onclick="showSection('settings',this)">
+          <span class="icon">⚙️</span> System Settings
+        </div>
+        <div class="nav-item" onclick="showSection('audit',this)">
+          <span class="icon">🔍</span> Audit Log
+        </div>
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="admin-user">
+        <div class="admin-avatar">JD</div>
+        <div class="admin-info">
+          <div class="admin-name">Juan dela Cruz</div>
+          <div class="admin-role">Super Administrator</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════ MAIN ═══════════════════ -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1 id="page-title">Admin Dashboard</h1>
+        <p id="page-sub">Complete Sensation · Admin Console · Last synced: just now</p>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-search">
+          <span class="search-icon">🔍</span>
+          <input type="text" placeholder="Search affiliates, orders…">
+        </div>
+        <div class="sys-status">System Online</div>
+        <div class="notif-btn" onclick="showSection('notifications',document.querySelector('[onclick*=notifications]'));updateTitle('Notifications','System alerts & messages')">
+          🔔<span class="notif-dot"></span>
+        </div>
+        <div class="topbar-avatar">JD</div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ════════════════ OVERVIEW ════════════════ -->
+      <div id="overview" class="section active">
+
+        <div class="alert alert-warn">
+          ⚠️ <strong>12 payout requests</strong> are pending your approval — totaling ₱ 84,320. <a href="#" onclick="showSection('payouts',document.querySelector('[onclick*=payouts]'));return false;" style="color:var(--warning);text-decoration:underline;margin-left:6px">Review now →</a>
+        </div>
+
+        <!-- Top Stats -->
+        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="stat-card">
+            <div class="stat-icon red">💰</div>
+            <div class="stat-value">₱ 2.84M</div>
+            <div class="stat-label">Total Platform Revenue</div>
+            <div class="stat-change up">↑ 18.2% vs last month</div>
+          </div>
+          <div class="stat-card gold-c">
+            <div class="stat-icon gold">💸</div>
+            <div class="stat-value gold-text">₱ 426K</div>
+            <div class="stat-label">Total Commissions Paid</div>
+            <div class="stat-change up">↑ 14.7% vs last month</div>
+          </div>
+          <div class="stat-card green-c">
+            <div class="stat-icon green">👥</div>
+            <div class="stat-value green-text">1,248</div>
+            <div class="stat-label">Active Affiliates</div>
+            <div class="stat-change up">↑ 34 new this week</div>
+          </div>
+          <div class="stat-card blue-c">
+            <div class="stat-icon blue">🛒</div>
+            <div class="stat-value blue-text">8,914</div>
+            <div class="stat-label">Total Orders (MTD)</div>
+            <div class="stat-change up">↑ 9.3% vs last month</div>
+          </div>
+        </div>
+
+        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="stat-card warn-c">
+            <div class="stat-icon warn">⏳</div>
+            <div class="stat-value warn-text">₱ 84,320</div>
+            <div class="stat-label">Pending Payouts</div>
+            <div class="stat-change neutral">12 requests awaiting</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon red">📝</div>
+            <div class="stat-value red-text">7</div>
+            <div class="stat-label">New Applications</div>
+            <div class="stat-change neutral">Awaiting review</div>
+          </div>
+          <div class="stat-card green-c">
+            <div class="stat-icon green">🔗</div>
+            <div class="stat-value green-text">94,210</div>
+            <div class="stat-label">Total Link Clicks (MTD)</div>
+            <div class="stat-change up">↑ 31% vs last period</div>
+          </div>
+          <div class="stat-card blue-c">
+            <div class="stat-icon blue">📊</div>
+            <div class="stat-value blue-text">22.8%</div>
+            <div class="stat-label">Avg. Conversion Rate</div>
+            <div class="stat-change up">↑ 2.1 pts improvement</div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <!-- Revenue Chart -->
+          <div class="card">
+            <div class="card-title">
+              <span class="card-title-text">📈 Monthly Revenue</span>
+              <select class="filter-select" style="font-size:11px;padding:5px 10px">
+                <option>2025</option><option>2024</option>
+              </select>
+            </div>
+            <div class="chart-bars">
+              <div class="bar-wrap"><div class="bar-val">168K</div><div class="bar" style="height:38%"></div><div class="bar-label">Jan</div></div>
+              <div class="bar-wrap"><div class="bar-val">192K</div><div class="bar" style="height:43%"></div><div class="bar-label">Feb</div></div>
+              <div class="bar-wrap"><div class="bar-val">175K</div><div class="bar" style="height:39%"></div><div class="bar-label">Mar</div></div>
+              <div class="bar-wrap"><div class="bar-val">240K</div><div class="bar" style="height:54%"></div><div class="bar-label">Apr</div></div>
+              <div class="bar-wrap"><div class="bar-val">285K</div><div class="bar" style="height:64%"></div><div class="bar-label">May</div></div>
+              <div class="bar-wrap"><div class="bar-val">310K</div><div class="bar" style="height:70%"></div><div class="bar-label">Jun</div></div>
+              <div class="bar-wrap"><div class="bar-val" style="color:var(--gold-light)">440K</div><div class="bar" style="height:99%;background:linear-gradient(180deg,var(--gold-light),var(--gold))"></div><div class="bar-label" style="color:var(--gold)">Jul</div></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-top:14px;font-size:12px">
+              <span style="color:var(--gray)">YTD Total: <b style="color:#fff">₱ 1.81M</b></span>
+              <span style="color:var(--gold)">Best month: July</span>
+            </div>
+          </div>
+
+          <!-- Recent Activity -->
+          <div class="card">
+            <div class="card-title"><span class="card-title-text">⚡ Live Activity Feed</span></div>
+            <div class="activity-feed">
+              <div class="activity-item">
+                <div class="activity-icon" style="background:rgba(40,168,122,0.15)">✅</div>
+                <div class="activity-body">
+                  <div class="activity-title"><b>Maria Santos</b> completed a sale — ₱ 1,999</div>
+                  <div class="activity-time">2 minutes ago · CS GODX · Commission: ₱ 300</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon" style="background:rgba(201,168,76,0.15)">📝</div>
+                <div class="activity-body">
+                  <div class="activity-title">New application from <b>Ricardo Reyes</b></div>
+                  <div class="activity-time">15 minutes ago · Reseller type · Quezon City</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon" style="background:rgba(176,16,32,0.2)">💸</div>
+                <div class="activity-body">
+                  <div class="activity-title"><b>Carlo Mendoza</b> requested withdrawal of ₱ 4,500</div>
+                  <div class="activity-time">38 minutes ago · GCash · Pending approval</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon" style="background:rgba(80,136,212,0.15)">🏆</div>
+                <div class="activity-body">
+                  <div class="activity-title"><b>Ana Gomez</b> upgraded to <b>Platinum Tier</b></div>
+                  <div class="activity-time">1 hour ago · ₱ 150k threshold reached</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-icon" style="background:rgba(245,166,35,0.12)">⚠️</div>
+                <div class="activity-body">
+                  <div class="activity-title">Unusual click pattern on link <b>CS-REF-01284</b></div>
+                  <div class="activity-time">2 hours ago · Flagged for review · Bot detection</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Affiliates + Pending Payouts -->
+        <div class="two-col">
+          <div class="table-wrap">
+            <div class="table-header">
+              <div class="table-header-title">🏅 Top Affiliates This Month</div>
+              <button class="btn btn-outline btn-sm" onclick="showSection('affiliates',document.querySelector('[onclick*=affiliates]'))">View All</button>
+            </div>
+            <table>
+              <thead><tr><th>Affiliate</th><th>Tier</th><th>Sales</th><th>Commission</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><div class="user-mini"><div class="user-avatar" style="background:linear-gradient(135deg,#B01020,#7A0010)">AG</div><div><div class="user-mini-name">Ana Gomez</div><div class="user-mini-id">CS-2024-00012</div></div></div></td>
+                  <td><span class="tier-badge tier-platinum">💎 Platinum</span></td>
+                  <td style="color:var(--success-light);font-weight:600">₱ 183,400</td>
+                  <td style="color:var(--gold-light);font-weight:600">₱ 36,680</td>
+                </tr>
+                <tr>
+                  <td><div class="user-mini"><div class="user-avatar" style="background:linear-gradient(135deg,#5088D4,#2855A0)">BT</div><div><div class="user-mini-name">Ben Torres</div><div class="user-mini-id">CS-2024-00034</div></div></div></td>
+                  <td><span class="tier-badge tier-platinum">💎 Platinum</span></td>
+                  <td style="color:var(--success-light);font-weight:600">₱ 165,200</td>
+                  <td style="color:var(--gold-light);font-weight:600">₱ 33,040</td>
+                </tr>
+                <tr>
+                  <td><div class="user-mini"><div class="user-avatar" style="background:linear-gradient(135deg,#C9A84C,#8A6020)">MS</div><div><div class="user-mini-name">Maria Santos</div><div class="user-mini-id">CS-2024-00842</div></div></div></td>
+                  <td><span class="tier-badge tier-gold">🥇 Gold</span></td>
+                  <td style="color:var(--success-light);font-weight:600">₱ 98,600</td>
+                  <td style="color:var(--gold-light);font-weight:600">₱ 14,790</td>
+                </tr>
+                <tr>
+                  <td><div class="user-mini"><div class="user-avatar" style="background:linear-gradient(135deg,#28A87A,#156040)">LV</div><div><div class="user-mini-name">Lisa Villanueva</div><div class="user-mini-id">CS-2024-00198</div></div></div></td>
+                  <td><span class="tier-badge tier-gold">🥇 Gold</span></td>
+                  <td style="color:var(--success-light);font-weight:600">₱ 87,300</td>
+                  <td style="color:var(--gold-light);font-weight:600">₱ 13,095</td>
+                </tr>
+                <tr>
+                  <td><div class="user-mini"><div class="user-avatar" style="background:linear-gradient(135deg,#9050DC,#5020A0)">RP</div><div><div class="user-mini-name">Rico Pascual</div><div class="user-mini-id">CS-2024-00311</div></div></div></td>
+                  <td><span class="tier-badge tier-silver">🥈 Silver</span></td>
+                  <td style="color:var(--success-light);font-weight:600">₱ 44,700</td>
+                  <td style="color:var(--gold-light);font-weight:600">₱ 4,470</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-title"><span class="card-title-text">💸 Urgent Payout Requests</span><button class="btn btn-primary btn-sm" onclick="showSection('payouts',document.querySelector('[onclick*=payouts]'))">Manage</button></div>
+
+            <div class="payout-req-card">
+              <div class="user-avatar" style="background:linear-gradient(135deg,#C9A84C,#8A6020)">MS</div>
+              <div class="payout-req-body">
+                <div class="payout-req-name">Maria Santos</div>
+                <div class="payout-req-meta">GCash · 0917 XXX 8421 · Requested 2h ago</div>
+              </div>
+              <div class="payout-req-amount">₱6,240</div>
+              <div class="payout-req-actions">
+                <button class="btn btn-green btn-xs" onclick="showToast('✅ Payout approved for Maria Santos')">✓</button>
+                <button class="btn btn-danger btn-xs" onclick="showToast('❌ Payout declined','error')">✕</button>
+              </div>
+            </div>
+            <div class="payout-req-card">
+              <div class="user-avatar" style="background:linear-gradient(135deg,#B01020,#7A0010)">CM</div>
+              <div class="payout-req-body">
+                <div class="payout-req-name">Carlo Mendoza</div>
+                <div class="payout-req-meta">GCash · 0918 XXX 4432 · Requested 38m ago</div>
+              </div>
+              <div class="payout-req-amount">₱4,500</div>
+              <div class="payout-req-actions">
+                <button class="btn btn-green btn-xs" onclick="showToast('✅ Payout approved for Carlo Mendoza')">✓</button>
+                <button class="btn btn-danger btn-xs" onclick="showToast('❌ Payout declined','error')">✕</button>
+              </div>
+            </div>
+            <div class="payout-req-card">
+              <div class="user-avatar" style="background:linear-gradient(135deg,#28A87A,#156040)">LV</div>
+              <div class="payout-req-body">
+                <div class="payout-req-name">Lisa Villanueva</div>
+                <div class="payout-req-meta">Maya · 0928 XXX 7710 · Requested 3h ago</div>
+              </div>
+              <div class="payout-req-amount">₱9,800</div>
+              <div class="payout-req-actions">
+                <button class="btn btn-green btn-xs" onclick="showToast('✅ Payout approved for Lisa Villanueva')">✓</button>
+                <button class="btn btn-danger btn-xs" onclick="showToast('❌ Payout declined','error')">✕</button>
+              </div>
+            </div>
+
+            <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--gray)">+9 more pending · <a href="#" onclick="showSection('payouts',document.querySelector('[onclick*=payouts]'));return false" style="color:var(--crimson-bright)">View all</a></div>
+          </div>
+        </div>
+
+      </div><!-- /overview -->
+
+      <!-- ════════════════ ANALYTICS ════════════════ -->
+      <div id="analytics" class="section">
+        <div class="sec-heading">
+          <div><div class="sec-title">Analytics & Reports</div><div class="sec-sub">Platform-wide performance metrics and trend analysis</div></div>
+          <div class="sec-actions">
+            <select class="filter-select">
+              <option>Last 30 Days</option><option>Last 90 Days</option><option>This Year</option>
+            </select>
+            <button class="btn btn-outline" onclick="showToast('📥 Report exported to CSV')">📥 Export</button>
+          </div>
+        </div>
+
+        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="stat-card"><div class="stat-icon red">🔗</div><div class="stat-value">94,210</div><div class="stat-label">Total Link Clicks</div><div class="stat-change up">↑ 31% vs prior period</div></div>
+          <div class="stat-card green-c"><div class="stat-icon green">✅</div><div class="stat-value green-text">21,493</div><div class="stat-label">Conversions</div><div class="stat-change up">↑ 18.4% vs prior period</div></div>
+          <div class="stat-card gold-c"><div class="stat-icon gold">📊</div><div class="stat-value gold-text">22.8%</div><div class="stat-label">Conv. Rate</div><div class="stat-change up">↑ 2.1 pts</div></div>
+          <div class="stat-card blue-c"><div class="stat-icon blue">💵</div><div class="stat-value blue-text">₱ 131.80</div><div class="stat-label">Avg. Order Value</div><div class="stat-change up">↑ ₱ 8 vs prior</div></div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-title"><span class="card-title-text">📊 Sales by Product</span></div>
+            <table>
+              <thead><tr><th>Product</th><th>Units Sold</th><th>Revenue</th><th>Comm. Paid</th></tr></thead>
+              <tbody>
+                <tr><td><b>CS GODX</b></td><td>3,842</td><td style="color:var(--success-light)">₱ 768K</td><td style="color:var(--gold)">₱ 115K</td></tr>
+                <tr><td><b>CS GOLD</b></td><td>2,914</td><td style="color:var(--success-light)">₱ 670K</td><td style="color:var(--gold)">₱ 100K</td></tr>
+                <tr><td><b>CS AEON</b></td><td>2,100</td><td style="color:var(--success-light)">₱ 399K</td><td style="color:var(--gold)">₱ 60K</td></tr>
+                <tr><td><b>CS CLUB</b></td><td>1,648</td><td style="color:var(--success-light)">₱ 296K</td><td style="color:var(--gold)">₱ 44K</td></tr>
+                <tr><td><b>CS PRO</b></td><td>820</td><td style="color:var(--success-light)">₱ 246K</td><td style="color:var(--gold)">₱ 37K</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-title"><span class="card-title-text">🗺️ Sales by Region</span></div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span>NCR (Metro Manila)</span><span style="color:var(--success-light)">₱ 1.24M</span></div><div class="progress-bar"><div class="progress-fill red" style="width:100%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span>CALABARZON</span><span style="color:var(--success-light)">₱ 640K</span></div><div class="progress-bar"><div class="progress-fill gold" style="width:52%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span>Central Luzon</span><span style="color:var(--success-light)">₱ 380K</span></div><div class="progress-bar"><div class="progress-fill green" style="width:31%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span>Western Visayas</span><span style="color:var(--success-light)">₱ 220K</span></div><div class="progress-bar"><div class="progress-fill blue" style="width:18%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span>Davao Region</span><span style="color:var(--success-light)">₱ 180K</span></div><div class="progress-bar"><div class="progress-fill blue" style="width:15%"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span>Other Regions</span><span style="color:var(--success-light)">₱ 180K</span></div><div class="progress-bar"><div class="progress-fill" style="width:15%;background:rgba(255,255,255,0.25)"></div></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title"><span class="card-title-text">📅 Affiliate Signups Over Time</span></div>
+          <div class="chart-bars" style="height:130px">
+            <div class="bar-wrap"><div class="bar-val">42</div><div class="bar" style="height:30%"></div><div class="bar-label">Jan</div></div>
+            <div class="bar-wrap"><div class="bar-val">58</div><div class="bar" style="height:41%"></div><div class="bar-label">Feb</div></div>
+            <div class="bar-wrap"><div class="bar-val">71</div><div class="bar" style="height:51%"></div><div class="bar-label">Mar</div></div>
+            <div class="bar-wrap"><div class="bar-val">95</div><div class="bar" style="height:68%"></div><div class="bar-label">Apr</div></div>
+            <div class="bar-wrap"><div class="bar-val">118</div><div class="bar" style="height:84%"></div><div class="bar-label">May</div></div>
+            <div class="bar-wrap"><div class="bar-val">104</div><div class="bar" style="height:74%"></div><div class="bar-label">Jun</div></div>
+            <div class="bar-wrap"><div class="bar-val" style="color:var(--gold-light)">140</div><div class="bar" style="height:99%;background:linear-gradient(180deg,var(--gold-light),var(--gold))"></div><div class="bar-label" style="color:var(--gold)">Jul</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════ AFFILIATES ════════════════ -->
+      <div id="affiliates" class="section">
+        <div class="sec-heading">
+          <div><div class="sec-title">All Affiliates</div><div class="sec-sub">1,248 active affiliates across all tiers</div></div>
+          <div class="sec-actions">
+            <div class="search-bar"><span>🔍</span><input type="text" placeholder="Search by name, ID, email…"></div>
+            <select class="filter-select"><option>All Tiers</option><option>Platinum</option><option>Gold</option><option>Silver</option></select>
+            <select class="filter-select"><option>All Status</option><option>Active</option><option>Inactive</option><option>Suspended</option></select>
+            <button class="btn btn-primary" onclick="openModal('add-affiliate-modal')">+ Add Affiliate</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Affiliate</th><th>ID</th><th>Tier</th><th>Status</th><th>MTD Sales</th><th>MTD Comm.</th><th>Sub-Affiliates</th><th>Joined</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="user-mini"><div class="user-avatar" style="background:linear-gradient(135deg,#B01020,#7A0010)">AG</div><div><div class="user-mini-name">Ana Gomez</div><div class="user-mini-id">ana.gomez@email.com</div></div></div></td>
+                <td class="td-mono">CS-2024-00012</td>
+                <td><span class="tier-badge tier-platinum">💎 Platinum</span></td>
+                <td><span class="badge badge-green">● Active</span></td>
+                <td style="color:var(--success-light)">₱ 183,400</td>
+                <td style="color:var(--gold)">₱ 36,680</td>
+                <td style="text-align:center">48</td>
+                <td style="color:var(--gray)">Jan 2024</td>
+                <td><div class="action-row"><button class="btn btn-outline btn-xs" onclick="openModal('view-affiliate-modal')">View</button><button class="btn btn-xs" style="background:rgba(245,166,35,0.15);color:var(--warning);border:1px solid rgba(245,166,35,0.2)" onclick="showToast('⚠️ Affiliate suspended','warn')">Suspend</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="user-mini"><div class="user-avatar" style="background:linear-gradient(135deg,#5088D4,#2855A0)">BT</div><div><div class="user-mini-name">Ben Torres</div><div class="user-mini-id">ben.torres@email.com</div></div></div></td>
+                <td class="td-mono">CS-2024-00034</td>
+                <td><span class="tier-badge tier-platinum">💎 Platinum</span></td>
+                <td><span class="badge badge-green">● Active</span></td>
+                <td style="color:var(--success-light)">₱ 165,200</td>
+                <td style="color:var(--gold)">₱ 33,040</td>
+                <td style="text-align:center">31</td>
+                <td style="color:var(--gray)">Feb 2024</td>
+                <td><div class="action-row"><button class="btn btn-outline btn-xs" onclick="openModal('view-affiliate-modal')">View</button><button class="btn btn-xs" style="background:rgba(245,166,35,0.15);color:var(--warning);border:1px solid rgba(245,166,35,0.2)" onclick="showToast('⚠️ Affiliate suspended','warn')">Suspend</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="user-mini"><div class="user-avatar" style="background:linear-gradient(135deg,#C9A84C,#8A6020)">MS</div><div><div class="user-mini-name">Maria Santos</div><div class="user-mini-id">maria.santos@email.com</div></div></div></td>
+                <td class="td-mono">CS-2024-00842</td>
+                <td><span class="tier-badge tier-gold">🥇 Gold</span></td>
+                <td><span class="badge badge-green">● Active</span></td>
+                <td style="color:var(--success-light)">₱ 98,600</td>
+                <td style="color:var(--gold)">₱ 14,790</td>
+                <td style="text-align:center">34</td>
+                <td style="color:var(--gray)">Mar 2024</td>
+                <td><div class="action-row"><button class="btn btn-outline btn-xs" onclick="openModal('view-affiliate-modal')">View</button><button class="btn btn-xs" style="background:rgba(245,166,35,0.15);color:var(--warning);border:1px solid rgba(245,166,35,0.2)" onclick="showToast('⚠️ Affiliate suspended','warn')">Suspend</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="user-mini"><div class="user-avatar" style="background:linear-gradient(135deg,#28A87A,#156040)">LV</div><div><div class="user-mini-name">Lisa Villanueva</div><div class="user-mini-id">lisa.v@email.com</div></div></div></td>
+                <td class="td-mono">CS-2024-00198</td>
+                <td><span class="tier-badge tier-gold">🥇 Gold</span></td>
+                <td><span class="badge badge-green">● Active</span></td>
+                <td style="color:var(--success-light)">₱ 87,300</td>
+                <td style="color:var(--gold)">₱ 13,095</td>
+                <td style="text-align:center">22</td>
+                <td style="color:var(--gray)">Apr 2024</td>
+                <td><div class="action-row"><button class="btn btn-outline btn-xs" onclick="openModal('view-affiliate-modal')">View</button><button class="btn btn-xs" style="background:rgba(245,166,35,0.15);color:var(--warning);border:1px solid rgba(245,166,35,0.2)" onclick="showToast('⚠️ Affiliate suspended','warn')">Suspend</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="user-mini"><div class="user-avatar" style="background:linear-gradient(135deg,#9050DC,#5020A0)">RP</div><div><div class="user-mini-name">Rico Pascual</div><div class="user-mini-id">rico.p@email.com</div></div></div></td>
+                <td class="td-mono">CS-2024-00311</td>
+                <td><span class="tier-badge tier-silver">🥈 Silver</span></td>
+                <td><span class="badge badge-green">● Active</span></td>
+                <td style="color:var(--success-light)">₱ 44,700</td>
+                <td style="color:var(--gold)">₱ 4,470</td>
+                <td style="text-align:center">8</td>
+                <td style="color:var(--gray)">Jun 2024</td>
+                <td><div class="action-row"><button class="btn btn-outline btn-xs" onclick="openModal('view-affiliate-modal')">View</button><button class="btn btn-xs" style="background:rgba(245,166,35,0.15);color:var(--warning);border:1px solid rgba(245,166,35,0.2)" onclick="showToast('⚠️ Affiliate suspended','warn')">Suspend</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="user-mini"><div class="user-avatar" style="background:rgba(138,122,122,0.3)">JL</div><div><div class="user-mini-name">Jose Luna</div><div class="user-mini-id">jose.luna@email.com</div></div></div></td>
+                <td class="td-mono">CS-2024-00540</td>
+                <td><span class="tier-badge tier-silver">🥈 Silver</span></td>
+                <td><span class="badge badge-red">● Suspended</span></td>
+                <td style="color:var(--gray)">₱ 0</td>
+                <td style="color:var(--gray)">₱ 0</td>
+                <td style="text-align:center;color:var(--gray)">3</td>
+                <td style="color:var(--gray)">May 2024</td>
+                <td><div class="action-row"><button class="btn btn-outline btn-xs" onclick="openModal('view-affiliate-modal')">View</button><button class="btn btn-green btn-xs" onclick="showToast('✅ Affiliate reactivated')">Reactivate</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+          <div style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(176,16,32,0.1)">
+            <span style="font-size:12px;color:var(--gray)">Showing 6 of 1,248 affiliates</span>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-outline btn-xs">← Prev</button>
+              <button class="btn btn-primary btn-xs">Next →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════ APPLICATIONS ════════════════ -->
+      <div id="applications" class="section">
+        <div class="sec-heading">
+          <div><div class="sec-title">Affiliate Applications</div><div class="sec-sub">Review and process new affiliate applications</div></div>
+          <div class="sec-actions">
+            <button class="btn btn-green" onclick="showToast('✅ All applications approved in bulk')">✓ Approve All</button>
+            <button class="btn btn-outline" onclick="showToast('📥 Applications list downloaded')">📥 Export</button>
+          </div>
+        </div>
+
+        <div class="alert alert-info">📋 7 new applications are waiting for review. Average review time: 1.2 days.</div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Applicant</th><th>Contact</th><th>Type</th><th>Location</th><th>Referred By</th><th>Applied</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="user-mini"><div class="user-avatar" style="background:rgba(176,16,32,0.25)">RR</div><div><div class="user-mini-name">Ricardo Reyes</div><div class="user-mini-id">ricardo.r@email.com</div></div></div></td>
+                <td style="color:var(--gray)">0917-444-1234</td>
+                <td><span class="badge badge-blue">Reseller</span></td>
+                <td>Quezon City</td>
+                <td class="td-mono" style="color:var(--gold)">CS-2024-00012</td>
+                <td style="color:var(--gray)">Jul 14, 2025</td>
+                <td><span class="badge badge-gold">⏳ Pending</span></td>
+                <td><div class="action-row"><button class="btn btn-green btn-xs" onclick="showToast('✅ Application approved')">Approve</button><button class="btn btn-danger btn-xs" onclick="showToast('❌ Application rejected','error')">Reject</button><button class="btn btn-outline btn-xs" onclick="openModal('application-modal')">View</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="user-mini"><div class="user-avatar" style="background:rgba(201,168,76,0.2)">JC</div><div><div class="user-mini-name">Juana Cruz</div><div class="user-mini-id">juana.c@email.com</div></div></div></td>
+                <td style="color:var(--gray)">0928-555-9012</td>
+                <td><span class="badge badge-purple">Distributor</span></td>
+                <td>Makati</td>
+                <td class="td-mono" style="color:var(--gold)">CS-2024-00034</td>
+                <td style="color:var(--gray)">Jul 13, 2025</td>
+                <td><span class="badge badge-gold">⏳ Pending</span></td>
+                <td><div class="action-row"><button class="btn btn-green btn-xs" onclick="showToast('✅ Application approved')">Approve</button><button class="btn btn-danger btn-xs" onclick="showToast('❌ Application rejected','error')">Reject</button><button class="btn btn-outline btn-xs" onclick="openModal('application-modal')">View</button></div></td>
+              </tr>
+              <tr>
+                <td><div class="user-mini"><div class="user-avatar" style="background:rgba(80,136,212,0.25)">PN</div><div><div class="user-mini-name">Pedro Navarro</div><div class="user-mini-id">pedro.n@email.com</div></div></div></td>
+                <td style="color:var(--gray)">0999-323-8800</td>
+                <td><span class="badge badge-blue">Reseller</span></td>
+                <td>Cebu City</td>
+                <td class="td-mono" style="color:var(--gray)">Organic</td>
+                <td style="color:var(--gray)">Jul 12, 2025</td>
+                <td><span class="badge badge-blue">🔍 In Review</span></td>
+                <td><div class="action-row"><button class="btn btn-green btn-xs" onclick="showToast('✅ Application approved')">Approve</button><button class="btn btn-danger btn-xs" onclick="showToast('❌ Application rejected','error')">Reject</button><button class="btn btn-outline btn-xs" onclick="openModal('application-modal')">View</button></div></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ════════════════ PAYOUTS ════════════════ -->
+      <div id="payouts" class="section">
+        <div class="sec-heading">
+          <div><div class="sec-title">Payout Requests</div><div class="sec-sub">12 requests pending · Total: ₱ 84,320</div></div>
+          <div class="sec-actions">
+            <button class="btn btn-green" onclick="showToast('✅ All pending payouts approved in bulk!')">✓ Approve All</button>
+            <button class="btn btn-outline" onclick="showToast('📥 Payout report exported')">📥 Export</button>
+          </div>
+        </div>
+
+        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:22px">
+          <div class="stat-card warn-c"><div class="stat-icon warn">⏳</div><div class="stat-value warn-text">₱ 84,320</div><div class="stat-label">Total Pending</div><div class="stat-change neutral">12 requests</div></div>
+          <div class="stat-card green-c"><div class="stat-icon green">✅</div><div class="stat-value green-text">₱ 312,400</div><div class="stat-label">Paid This Month</div><div class="stat-change up">↑ 18% vs last month</div></div>
+          <div class="stat-card"><div class="stat-icon red">📋</div><div class="stat-value">₱ 1.84M</div><div class="stat-label">All-Time Payouts</div><div class="stat-change neutral">Since inception</div></div>
+          <div class="stat-card blue-c"><div class="stat-icon blue">⚡</div><div class="stat-value blue-text">1.4 days</div><div class="stat-label">Avg. Processing Time</div><div class="stat-change up">↓ 0.3 days improved</div></div>
+        </div>
+
+        <div class="table-wrap">
+          <div class="table-header">
+            <div class="table-header-title">Pending Payout Requests</div>
+            <div class="table-filters">
+              <select class="filter-select"><option>All Methods</option><option>GCash</option><option>Maya</option><option>Bank Transfer</option></select>
+              <div class="search-bar" style="width:200px"><span>🔍</span><input type="text" placeholder="Search affiliate…"></div>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Affiliate</th><th>Amount</th><th>Method</th><th>Account</th><th>Requested</th><th>Available Bal.</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td><div class="user-mini"><div class="user-avatar" style="background:linear-gradient(135deg,#C9A84C,#8A6020)">MS</div><div><div class="user-mini-name">Maria Santos</div><div class="user-mini-id">CS-2024-00842</div></div></div></td><td style="color:var(--gold-light);font-weight:700;font-family:'Bebas Neue';font-size:18px">₱ 6,240</td><td><span class="badge badge-blue">💙 GCash</span></td><td class="td-mono">0917 XXX 8421</td><td style="color:var(--gray)">Jul 14, 2 hrs ago</td><td style="color:var(--success-light)">₱ 6,240</td><td><div class="action-row"><button class="btn btn-green btn-sm" onclick="showToast('✅ Payout approved for Maria Santos')">✓ Approve</button><button class="btn btn-danger btn-sm" onclick="showToast('❌ Payout declined','error')">Reject</button></div></td></tr>
+              <tr><td><div class="user-mini"><div class="user-avatar" style="background:linear-gradient(135deg,#B01020,#7A0010)">CM</div><div><div class="user-mini-name">Carlo Mendoza</div><div class="user-mini-id">CS-2024-00621</div></div></div></td><td style="color:var(--gold-light);font-weight:700;font-family:'Bebas Neue';font-size:18px">₱ 4,500</td><td><span class="badge badge-blue">💙 GCash</span></td><td class="td-mono">0918 XXX 4432</td><td style="color:var(--gray)">Jul 14, 38m ago</td><td style="color:var(--success-light)">₱ 5,120</td><td><div class="action-row"><button class="btn btn-green btn-sm" onclick="showToast('✅ Payout approved for Carlo Mendoza')">✓ Approve</button><button class="btn btn-danger btn-sm" onclick="showToast('❌ Payout declined','error')">Reject</button></div></td></tr>
+              <tr><td><div class="user-mini"><div class="user-avatar" style="background:linear-gradient(135deg,#28A87A,#156040)">LV</div><div><div class="user-mini-name">Lisa Villanueva</div><div class="user-mini-id">CS-2024-00198</div></div></div></td><td style="color:var(--gold-light);font-weight:700;font-family:'Bebas Neue';font-size:18px">₱ 9,800</td><td><span class="badge badge-green">💚 Maya</span></td><td class="td-mono">0928 XXX 7710</td><td style="color:var(--gray)">Jul 14, 3 hrs ago</td><td style="color:var(--success-light)">₱ 13,095</td><td><div class="action-row"><button class="btn btn-green btn-sm" onclick="showToast('✅ Payout approved for Lisa Villanueva')">✓ Approve</button><button class="btn btn-danger btn-sm" onclick="showToast('❌ Payout declined','error')">Reject</button></div></td></tr>
+              <tr><td><div class="user-mini"><div class="user-avatar" style="background:linear-gradient(135deg,#5088D4,#2855A0)">BT</div><div><div class="user-mini-name">Ben Torres</div><div class="user-mini-id">CS-2024-00034</div></div></div></td><td style="color:var(--gold-light);font-weight:700;font-family:'Bebas Neue';font-size:18px">₱ 18,000</td><td><span class="badge badge-gray">🏦 BDO Bank</span></td><td class="td-mono">**** 4482</td><td style="color:var(--gray)">Jul 13, 1 day ago</td><td style="color:var(--success-light)">₱ 33,040</td><td><div class="action-row"><button class="btn btn-green btn-sm" onclick="showToast('✅ Payout approved for Ben Torres')">✓ Approve</button><button class="btn btn-danger btn-sm" onclick="showToast('❌ Payout declined','error')">Reject</button></div></td></tr>
+            </tbody>
+          </table>
+          <div style="padding:14px 18px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(176,16,32,0.1)">
+            <span style="font-size:12px;color:var(--gray)">Showing 4 of 12 pending requests</span>
+            <div style="display:flex;gap:6px"><button class="btn btn-outline btn-xs">← Prev</button><button class="btn btn-primary btn-xs">Next →</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════ COMMISSIONS ════════════════ -->
+      <div id="commissions" class="section">
+        <div class="sec-heading">
+          <div><div class="sec-title">Commission Ledger</div><div class="sec-sub">Full commission history and management</div></div>
+          <div class="sec-actions">
+            <select class="filter-select"><option>All Status</option><option>Approved</option><option>Pending</option><option>Rejected</option></select>
+            <button class="btn btn-outline" onclick="showToast('📥 Commission ledger exported')">📥 Export CSV</button>
+          </div>
+        </div>
+
+        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="stat-card green-c"><div class="stat-icon green">✅</div><div class="stat-value green-text">₱ 312K</div><div class="stat-label">Paid This Month</div></div>
+          <div class="stat-card warn-c"><div class="stat-icon warn">⏳</div><div class="stat-value warn-text">₱ 84K</div><div class="stat-label">Pending Approval</div></div>
+          <div class="stat-card"><div class="stat-icon red">📊</div><div class="stat-value">₱ 1.84M</div><div class="stat-label">All-Time Commissions</div></div>
+          <div class="stat-card gold-c"><div class="stat-icon gold">📈</div><div class="stat-value gold-text">14.9%</div><div class="stat-label">Avg. Comm. Rate</div></div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>Affiliate</th><th>Order ID</th><th>Product</th><th>Sale Amt</th><th>Comm. Rate</th><th>Commission</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+              <tr><td style="color:var(--gray)">Jul 14, 2025</td><td><div class="user-mini" style="min-width:120px"><div class="user-avatar" style="width:26px;height:26px;font-size:10px;background:linear-gradient(135deg,#C9A84C,#8A6020)">MS</div><span style="font-size:12.5px">Maria Santos</span></div></td><td class="td-mono">ORD-25071401</td><td>CS GODX</td><td>₱ 1,999</td><td style="color:var(--gold)">15%</td><td style="color:var(--success-light);font-weight:600">₱ 300</td><td><span class="badge badge-green">Approved</span></td><td><button class="btn btn-xs btn-outline" onclick="showToast('Commission details opened')">Details</button></td></tr>
+              <tr><td style="color:var(--gray)">Jul 14, 2025</td><td><div class="user-mini" style="min-width:120px"><div class="user-avatar" style="width:26px;height:26px;font-size:10px;background:linear-gradient(135deg,#28A87A,#156040)">LV</div><span style="font-size:12.5px">Lisa Villanueva</span></div></td><td class="td-mono">ORD-25071402</td><td>CS GOLD</td><td>₱ 2,299</td><td style="color:var(--gold)">15%</td><td style="color:var(--success-light);font-weight:600">₱ 345</td><td><span class="badge badge-green">Approved</span></td><td><button class="btn btn-xs btn-outline" onclick="showToast('Commission details opened')">Details</button></td></tr>
+              <tr><td style="color:var(--gray)">Jul 13, 2025</td><td><div class="user-mini" style="min-width:120px"><div class="user-avatar" style="width:26px;height:26px;font-size:10px;background:linear-gradient(135deg,#B01020,#7A0010)">AG</div><span style="font-size:12.5px">Ana Gomez</span></div></td><td class="td-mono">ORD-25071308</td><td>CS AEON</td><td>₱ 1,899</td><td style="color:var(--info-light)">20%</td><td style="color:var(--gold-light);font-weight:600">₱ 380</td><td><span class="badge badge-gold">Pending</span></td><td><div class="action-row"><button class="btn btn-green btn-xs" onclick="showToast('✅ Commission approved')">✓</button><button class="btn btn-danger btn-xs" onclick="showToast('❌ Commission rejected','error')">✕</button></div></td></tr>
+              <tr><td style="color:var(--gray)">Jul 13, 2025</td><td><div class="user-mini" style="min-width:120px"><div class="user-avatar" style="width:26px;height:26px;font-size:10px;background:linear-gradient(135deg,#5088D4,#2855A0)">BT</div><span style="font-size:12.5px">Ben Torres</span></div></td><td class="td-mono">ORD-25071309</td><td>CS PRO</td><td>₱ 2,999</td><td style="color:var(--info-light)">20%</td><td style="color:var(--gold-light);font-weight:600">₱ 600</td><td><span class="badge badge-gold">Pending</span></td><td><div class="action-row"><button class="btn btn-green btn-xs" onclick="showToast('✅ Commission approved')">✓</button><button class="btn btn-danger btn-xs" onclick="showToast('❌ Commission rejected','error')">✕</button></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ════════════════ ORDERS ════════════════ -->
+      <div id="orders" class="section">
+        <div class="sec-heading">
+          <div><div class="sec-title">Sales & Orders</div><div class="sec-sub">8,914 orders this month across all affiliates</div></div>
+          <div class="sec-actions">
+            <div class="search-bar"><span>🔍</span><input type="text" placeholder="Search order ID, product…"></div>
+            <select class="filter-select"><option>All Products</option><option>CS GODX</option><option>CS GOLD</option><option>CS AEON</option><option>CS CLUB</option></select>
+            <button class="btn btn-outline" onclick="showToast('📥 Orders report exported')">📥 Export</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Order ID</th><th>Date</th><th>Affiliate</th><th>Product</th><th>Qty</th><th>Amount</th><th>Commission</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td class="td-mono">ORD-25071401</td><td style="color:var(--gray)">Jul 14, 2025</td><td><span style="font-size:13px">Maria Santos</span></td><td>CS GODX</td><td style="text-align:center">1</td><td style="color:var(--success-light)">₱ 1,999</td><td style="color:var(--gold)">₱ 300</td><td><span class="badge badge-green">Completed</span></td></tr>
+              <tr><td class="td-mono">ORD-25071402</td><td style="color:var(--gray)">Jul 14, 2025</td><td><span style="font-size:13px">Lisa Villanueva</span></td><td>CS GOLD</td><td style="text-align:center">2</td><td style="color:var(--success-light)">₱ 4,598</td><td style="color:var(--gold)">₱ 690</td><td><span class="badge badge-green">Completed</span></td></tr>
+              <tr><td class="td-mono">ORD-25071403</td><td style="color:var(--gray)">Jul 14, 2025</td><td><span style="font-size:13px">Ben Torres</span></td><td>CS AEON</td><td style="text-align:center">1</td><td style="color:var(--success-light)">₱ 1,899</td><td style="color:var(--gold)">₱ 380</td><td><span class="badge badge-gold">Processing</span></td></tr>
+              <tr><td class="td-mono">ORD-25071404</td><td style="color:var(--gray)">Jul 14, 2025</td><td><span style="font-size:13px">Ana Gomez</span></td><td>CS PRO</td><td style="text-align:center">3</td><td style="color:var(--success-light)">₱ 8,997</td><td style="color:var(--gold)">₱ 1,800</td><td><span class="badge badge-green">Completed</span></td></tr>
+              <tr><td class="td-mono">ORD-25071398</td><td style="color:var(--gray)">Jul 13, 2025</td><td><span style="font-size:13px">Maria Santos</span></td><td>CS CLUB</td><td style="text-align:center">1</td><td style="color:var(--success-light)">₱ 1,799</td><td style="color:var(--gold)">₱ 270</td><td><span class="badge badge-red">Refunded</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ════════════════ PRODUCTS ════════════════ -->
+      <div id="products" class="section">
+        <div class="sec-heading">
+          <div><div class="sec-title">Product Management</div><div class="sec-sub">Manage products available for affiliate promotion</div></div>
+          <div class="sec-actions">
+            <button class="btn btn-primary" onclick="openModal('add-product-modal')">+ Add Product</button>
+          </div>
+        </div>
+        <div class="products-grid">
+          <div class="product-card">
+            <div class="product-thumb">🧴</div>
+            <div><div class="product-name">CS GODX</div><div class="product-sku">SKU: CS-GODX-200</div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-family:'Bebas Neue';font-size:22px;color:var(--success-light)">₱ 1,999</div>
+              <div style="font-size:12px;color:var(--gold)">15% Comm.</div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--gray)"><span>Stock: <b style="color:#fff">342 units</b></span><span class="badge badge-green">Active</span></div>
+            <div class="progress-bar"><div class="progress-fill red" style="width:72%"></div></div>
+            <div style="font-size:10px;color:var(--gray);margin-top:2px">3,842 sold this month</div>
+            <div style="display:flex;gap:8px;margin-top:4px">
+              <button class="btn btn-primary btn-sm" style="flex:1;justify-content:center" onclick="openModal('edit-product-modal')">✏️ Edit</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('📋 Product link copied!')">🔗 Link</button>
+            </div>
+          </div>
+          <div class="product-card">
+            <div class="product-thumb">✨</div>
+            <div><div class="product-name">CS GOLD</div><div class="product-sku">SKU: CS-GOLD-150</div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-family:'Bebas Neue';font-size:22px;color:var(--success-light)">₱ 2,299</div>
+              <div style="font-size:12px;color:var(--gold)">15% Comm.</div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--gray)"><span>Stock: <b style="color:#fff">218 units</b></span><span class="badge badge-green">Active</span></div>
+            <div class="progress-bar"><div class="progress-fill gold" style="width:55%"></div></div>
+            <div style="font-size:10px;color:var(--gray);margin-top:2px">2,914 sold this month</div>
+            <div style="display:flex;gap:8px;margin-top:4px">
+              <button class="btn btn-primary btn-sm" style="flex:1;justify-content:center" onclick="openModal('edit-product-modal')">✏️ Edit</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('📋 Product link copied!')">🔗 Link</button>
+            </div>
+          </div>
+          <div class="product-card">
+            <div class="product-thumb">⚡</div>
+            <div><div class="product-name">CS AEON</div><div class="product-sku">SKU: CS-AEON-180</div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-family:'Bebas Neue';font-size:22px;color:var(--success-light)">₱ 1,899</div>
+              <div style="font-size:12px;color:var(--gold)">15% Comm.</div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--gray)"><span>Stock: <b style="color:#fff">89 units</b></span><span class="badge badge-warn">Low Stock</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:22%;background:linear-gradient(90deg,var(--warning),#FFD070)"></div></div>
+            <div style="font-size:10px;color:var(--gray);margin-top:2px">2,100 sold this month</div>
+            <div style="display:flex;gap:8px;margin-top:4px">
+              <button class="btn btn-primary btn-sm" style="flex:1;justify-content:center" onclick="openModal('edit-product-modal')">✏️ Edit</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('📋 Product link copied!')">🔗 Link</button>
+            </div>
+          </div>
+          <div class="product-card">
+            <div class="product-thumb">🌿</div>
+            <div><div class="product-name">CS CLUB</div><div class="product-sku">SKU: CS-CLUB-100</div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-family:'Bebas Neue';font-size:22px;color:var(--success-light)">₱ 1,799</div>
+              <div style="font-size:12px;color:var(--gold)">15% Comm.</div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--gray)"><span>Stock: <b style="color:#fff">504 units</b></span><span class="badge badge-green">Active</span></div>
+            <div class="progress-bar"><div class="progress-fill green" style="width:88%"></div></div>
+            <div style="font-size:10px;color:var(--gray);margin-top:2px">1,648 sold this month</div>
+            <div style="display:flex;gap:8px;margin-top:4px">
+              <button class="btn btn-primary btn-sm" style="flex:1;justify-content:center" onclick="openModal('edit-product-modal')">✏️ Edit</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('📋 Product link copied!')">🔗 Link</button>
+            </div>
+          </div>
+          <div class="product-card">
+            <div class="product-thumb">💎</div>
+            <div><div class="product-name">CS PRO</div><div class="product-sku">SKU: CS-PRO-300</div></div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div style="font-family:'Bebas Neue';font-size:22px;color:var(--success-light)">₱ 2,999</div>
+              <div style="font-size:12px;color:var(--gold)">15% Comm.</div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--gray)"><span>Stock: <b style="color:#fff">156 units</b></span><span class="badge badge-green">Active</span></div>
+            <div class="progress-bar"><div class="progress-fill blue" style="width:40%"></div></div>
+            <div style="font-size:10px;color:var(--gray);margin-top:2px">820 sold this month</div>
+            <div style="display:flex;gap:8px;margin-top:4px">
+              <button class="btn btn-primary btn-sm" style="flex:1;justify-content:center" onclick="openModal('edit-product-modal')">✏️ Edit</button>
+              <button class="btn btn-outline btn-sm" onclick="showToast('📋 Product link copied!')">🔗 Link</button>
+            </div>
+          </div>
+          <div class="product-card" style="border-style:dashed;border-color:rgba(176,16,32,0.25);cursor:pointer;align-items:center;justify-content:center;min-height:280px" onclick="openModal('add-product-modal')">
+            <div style="text-align:center;color:var(--gray)">
+              <div style="font-size:36px;margin-bottom:12px">+</div>
+              <div style="font-size:14px;font-weight:600;color:rgba(255,255,255,0.4)">Add New Product</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════ TIERS ════════════════ -->
+      <div id="tiers" class="section">
+        <div class="sec-heading">
+          <div><div class="sec-title">Tier Management</div><div class="sec-sub">Configure commission tiers and affiliate thresholds</div></div>
+          <div class="sec-actions"><button class="btn btn-primary" onclick="showToast('✅ Tier settings saved')">💾 Save Changes</button></div>
+        </div>
+
+        <div class="three-col">
+          <div class="comm-rate-card silver">
+            <div style="font-size:13px;color:#C8C8D8;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">🥈 Silver Tier</div>
+            <div class="comm-rate-pct" style="color:#C8C8D8">10<span style="font-size:22px">%</span></div>
+            <div style="font-size:12px;color:rgba(200,200,216,0.6);margin:10px 0">Commission Rate</div>
+            <div class="divider"></div>
+            <div class="form-group"><label class="form-label">Min Monthly Sales (₱)</label><input class="form-input" value="0"></div>
+            <div class="form-group"><label class="form-label">Max Monthly Sales (₱)</label><input class="form-input" value="50000"></div>
+            <div class="form-group"><label class="form-label">Commission Rate (%)</label><input class="form-input" value="10"></div>
+            <div style="font-size:11px;color:rgba(200,200,216,0.5);margin-top:4px">Currently: <b style="color:#C8C8D8">844 affiliates</b></div>
+          </div>
+          <div class="comm-rate-card gold-t" style="position:relative">
+            <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--dark);font-size:9px;font-weight:700;letter-spacing:1.5px;padding:3px 10px;border-radius:10px">MOST COMMON</div>
+            <div style="font-size:13px;color:var(--gold-light);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">🥇 Gold Tier</div>
+            <div class="comm-rate-pct" style="color:var(--gold-light)">15<span style="font-size:22px">%</span></div>
+            <div style="font-size:12px;color:rgba(232,201,122,0.6);margin:10px 0">Commission Rate</div>
+            <div class="divider"></div>
+            <div class="form-group"><label class="form-label">Min Monthly Sales (₱)</label><input class="form-input" value="50000"></div>
+            <div class="form-group"><label class="form-label">Max Monthly Sales (₱)</label><input class="form-input" value="150000"></div>
+            <div class="form-group"><label class="form-label">Commission Rate (%)</label><input class="form-input" value="15"></div>
+            <div style="font-size:11px;color:rgba(232,201,122,0.5);margin-top:4px">Currently: <b style="color:var(--gold-light)">356 affiliates</b></div>
+          </div>
+          <div class="comm-rate-card platinum">
+            <div style="font-size:13px;color:#A0D4FF;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">💎 Platinum Tier</div>
+            <div class="comm-rate-pct" style="color:#A0D4FF">20<span style="font-size:22px">%</span></div>
+            <div style="font-size:12px;color:rgba(160,212,255,0.6);margin:10px 0">Commission Rate</div>
+            <div class="divider"></div>
+            <div class="form-group"><label class="form-label">Min Monthly Sales (₱)</label><input class="form-input" value="150000"></div>
+            <div class="form-group"><label class="form-label">Max Monthly Sales (₱)</label><input class="form-input" placeholder="No limit"></div>
+            <div class="form-group"><label class="form-label">Commission Rate (%)</label><input class="form-input" value="20"></div>
+            <div style="font-size:11px;color:rgba(160,212,255,0.5);margin-top:4px">Currently: <b style="color:#A0D4FF">48 affiliates</b></div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-title">Sub-Affiliate Override Rate</div>
+            <div class="form-group"><label class="form-label">Override Commission on Sub-Affiliate Sales (%)</label><input class="form-input" value="2"></div>
+            <div class="highlight-box" style="font-size:12px;color:rgba(255,255,255,0.6)">When an affiliate recruits a sub-affiliate, they earn this percentage override on all sub-affiliate sales.</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Payout Configuration</div>
+            <div class="form-group"><label class="form-label">Minimum Withdrawal Amount (₱)</label><input class="form-input" value="500"></div>
+            <div class="form-group"><label class="form-label">Payout Processing Days</label><select class="form-select"><option>1-2 Business Days</option><option>3-5 Business Days</option><option>Instant (GCash/Maya)</option></select></div>
+            <div class="form-group"><label class="form-label">Commission Hold Period</label><select class="form-select"><option>3 Days</option><option>7 Days</option><option>14 Days</option></select></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════ LINKS ════════════════ -->
+      <div id="links" class="section">
+        <div class="sec-heading">
+          <div><div class="sec-title">Affiliate Links</div><div class="sec-sub">Manage and monitor all affiliate tracking links</div></div>
+          <div class="sec-actions"><button class="btn btn-outline" onclick="showToast('📥 Links report exported')">📥 Export</button></div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header">
+            <div class="table-header-title">All Tracking Links</div>
+            <div class="table-filters">
+              <div class="search-bar" style="width:200px"><span>🔍</span><input type="text" placeholder="Search links…"></div>
+              <select class="filter-select"><option>All Status</option><option>Active</option><option>Flagged</option><option>Disabled</option></select>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>Affiliate</th><th>Link ID</th><th>URL</th><th>Clicks</th><th>Conv.</th><th>Conv. Rate</th><th>Revenue</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td>Maria Santos</td><td class="td-mono">CS-REF-00842</td><td class="td-mono" style="font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">completesensation.ph/ref/mariasantos</td><td>1,284</td><td>312</td><td style="color:var(--success-light)">24.3%</td><td style="color:var(--gold)">₱ 27,840</td><td><span class="badge badge-green">Active</span></td><td><div class="action-row"><button class="btn btn-xs btn-outline" onclick="showToast('🔗 Link copied!')">Copy</button><button class="btn btn-xs" style="background:rgba(245,166,35,0.15);color:var(--warning);border:1px solid rgba(245,166,35,0.2)" onclick="showToast('⚠️ Link disabled','warn')">Disable</button></div></td></tr>
+              <tr><td>Ben Torres</td><td class="td-mono">CS-REF-00034</td><td class="td-mono" style="font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">completesensation.ph/ref/bentorres</td><td>3,841</td><td>920</td><td style="color:var(--success-light)">23.9%</td><td style="color:var(--gold)">₱ 82,800</td><td><span class="badge badge-green">Active</span></td><td><div class="action-row"><button class="btn btn-xs btn-outline" onclick="showToast('🔗 Link copied!')">Copy</button><button class="btn btn-xs" style="background:rgba(245,166,35,0.15);color:var(--warning);border:1px solid rgba(245,166,35,0.2)" onclick="showToast('⚠️ Link disabled','warn')">Disable</button></div></td></tr>
+              <tr><td>Unknown</td><td class="td-mono">CS-REF-01284</td><td class="td-mono" style="font-size:11px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">completesensation.ph/ref/flagged01</td><td style="color:var(--danger)">12,401</td><td>8</td><td style="color:var(--danger)">0.06%</td><td style="color:var(--danger)">₱ 720</td><td><span class="badge badge-red">⚠️ Flagged</span></td><td><div class="action-row"><button class="btn btn-danger btn-xs" onclick="showToast('🚫 Link permanently disabled','error')">Block</button><button class="btn btn-outline btn-xs" onclick="showToast('🔍 Investigation opened')">Investigate</button></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ════════════════ TRANSACTIONS ════════════════ -->
+      <div id="transactions" class="section">
+        <div class="sec-heading">
+          <div><div class="sec-title">Transaction History</div><div class="sec-sub">Full audit trail of all platform transactions</div></div>
+          <div class="sec-actions">
+            <div class="search-bar"><span>🔍</span><input type="text" placeholder="Search transaction ID…"></div>
+            <select class="filter-select"><option>All Types</option><option>Commission</option><option>Payout</option><option>Refund</option></select>
+            <button class="btn btn-outline" onclick="showToast('📥 Transaction history exported')">📥 Export</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Txn ID</th><th>Date</th><th>Type</th><th>Affiliate</th><th>Description</th><th>Amount</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td class="td-mono">TXN-0072841</td><td style="color:var(--gray)">Jul 14 · 14:22</td><td><span class="badge badge-green">Commission</span></td><td>Maria Santos</td><td style="font-size:12px;color:var(--gray)">ORD-25071401 · CS GODX</td><td style="color:var(--success-light)">+₱ 300</td><td><span class="badge badge-green">Posted</span></td></tr>
+              <tr><td class="td-mono">TXN-0072840</td><td style="color:var(--gray)">Jul 14 · 12:08</td><td><span class="badge badge-blue">Payout</span></td><td>Ana Gomez</td><td style="font-size:12px;color:var(--gray)">GCash withdrawal — 0917 *** 1122</td><td style="color:var(--danger)">-₱ 22,000</td><td><span class="badge badge-green">Processed</span></td></tr>
+              <tr><td class="td-mono">TXN-0072835</td><td style="color:var(--gray)">Jul 13 · 18:45</td><td><span class="badge badge-gold">Commission</span></td><td>Ben Torres</td><td style="font-size:12px;color:var(--gray)">ORD-25071380 · CS PRO × 3</td><td style="color:var(--success-light)">+₱ 1,800</td><td><span class="badge badge-gold">Pending</span></td></tr>
+              <tr><td class="td-mono">TXN-0072830</td><td style="color:var(--gray)">Jul 13 · 11:20</td><td><span class="badge badge-red">Refund</span></td><td>Maria Santos</td><td style="font-size:12px;color:var(--gray)">ORD-25071398 reversed · CS CLUB</td><td style="color:var(--danger)">-₱ 270</td><td><span class="badge badge-green">Reversed</span></td></tr>
+              <tr><td class="td-mono">TXN-0072820</td><td style="color:var(--gray)">Jul 12 · 09:14</td><td><span class="badge badge-blue">Payout</span></td><td>Lisa Villanueva</td><td style="font-size:12px;color:var(--gray)">Maya withdrawal — 0928 *** 7710</td><td style="color:var(--danger)">-₱ 7,000</td><td><span class="badge badge-green">Processed</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ════════════════ NETWORK ════════════════ -->
+      <div id="network" class="section">
+        <div class="sec-heading">
+          <div><div class="sec-title">Affiliate Network Map</div><div class="sec-sub">Visualize the affiliate referral tree and sub-affiliate relationships</div></div>
+          <div class="sec-actions"><button class="btn btn-outline" onclick="showToast('📥 Network data exported')">📥 Export</button></div>
+        </div>
+        <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="stat-card"><div class="stat-icon red">👤</div><div class="stat-value">1,248</div><div class="stat-label">Total Affiliates</div></div>
+          <div class="stat-card green-c"><div class="stat-icon green">🌐</div><div class="stat-value green-text">84</div><div class="stat-label">Top-Level (L1)</div></div>
+          <div class="stat-card gold-c"><div class="stat-icon gold">📡</div><div class="stat-value gold-text">412</div><div class="stat-label">Sub-Affiliates (L2)</div></div>
+          <div class="stat-card blue-c"><div class="stat-icon blue">🔗</div><div class="stat-value blue-text">752</div><div class="stat-label">Sub-Sub (L3)</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Network Visualization (Ana Gomez's Network)</div>
+          <div style="background:rgba(0,0,0,0.2);border-radius:10px;padding:24px;text-align:center;min-height:260px;position:relative;overflow:hidden">
+            <!-- Simple SVG network graph -->
+            <svg width="100%" height="240" viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg" style="max-width:700px">
+              <!-- Lines -->
+              <line x1="350" y1="50" x2="180" y2="130" stroke="rgba(176,16,32,0.5)" stroke-width="1.5"/>
+              <line x1="350" y1="50" x2="350" y2="130" stroke="rgba(176,16,32,0.5)" stroke-width="1.5"/>
+              <line x1="350" y1="50" x2="520" y2="130" stroke="rgba(176,16,32,0.5)" stroke-width="1.5"/>
+              <line x1="180" y1="130" x2="100" y2="200" stroke="rgba(201,168,76,0.35)" stroke-width="1.5" stroke-dasharray="4,3"/>
+              <line x1="180" y1="130" x2="180" y2="200" stroke="rgba(201,168,76,0.35)" stroke-width="1.5" stroke-dasharray="4,3"/>
+              <line x1="350" y1="130" x2="280" y2="200" stroke="rgba(201,168,76,0.35)" stroke-width="1.5" stroke-dasharray="4,3"/>
+              <line x1="350" y1="130" x2="350" y2="200" stroke="rgba(201,168,76,0.35)" stroke-width="1.5" stroke-dasharray="4,3"/>
+              <line x1="520" y1="130" x2="470" y2="200" stroke="rgba(201,168,76,0.35)" stroke-width="1.5" stroke-dasharray="4,3"/>
+              <line x1="520" y1="130" x2="560" y2="200" stroke="rgba(201,168,76,0.35)" stroke-width="1.5" stroke-dasharray="4,3"/>
+              <!-- Root node -->
+              <circle cx="350" cy="50" r="24" fill="rgba(176,16,32,0.5)" stroke="rgba(176,16,32,0.8)" stroke-width="2"/>
+              <text x="350" y="54" text-anchor="middle" fill="white" font-size="11" font-family="DM Sans" font-weight="700">AG</text>
+              <text x="350" y="85" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="10" font-family="DM Sans">Ana Gomez · L1</text>
+              <!-- L2 nodes -->
+              <circle cx="180" cy="130" r="18" fill="rgba(201,168,76,0.3)" stroke="rgba(201,168,76,0.6)" stroke-width="1.5"/>
+              <text x="180" y="134" text-anchor="middle" fill="white" font-size="9" font-family="DM Sans">MS</text>
+              <text x="180" y="158" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="DM Sans">Maria S.</text>
+              <circle cx="350" cy="130" r="18" fill="rgba(201,168,76,0.3)" stroke="rgba(201,168,76,0.6)" stroke-width="1.5"/>
+              <text x="350" y="134" text-anchor="middle" fill="white" font-size="9" font-family="DM Sans">CM</text>
+              <text x="350" y="158" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="DM Sans">Carlo M.</text>
+              <circle cx="520" cy="130" r="18" fill="rgba(201,168,76,0.3)" stroke="rgba(201,168,76,0.6)" stroke-width="1.5"/>
+              <text x="520" y="134" text-anchor="middle" fill="white" font-size="9" font-family="DM Sans">LV</text>
+              <text x="520" y="158" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9" font-family="DM Sans">Lisa V.</text>
+              <!-- L3 nodes -->
+              <circle cx="100" cy="200" r="13" fill="rgba(80,136,212,0.25)" stroke="rgba(80,136,212,0.5)" stroke-width="1.5"/>
+              <text x="100" y="218" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8.5" font-family="DM Sans">Sub-1</text>
+              <circle cx="180" cy="200" r="13" fill="rgba(80,136,212,0.25)" stroke="rgba(80,136,212,0.5)" stroke-width="1.5"/>
+              <text x="180" y="218" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8.5" font-family="DM Sans">Sub-2</text>
+              <circle cx="280" cy="200" r="13" fill="rgba(80,136,212,0.25)" stroke="rgba(80,136,212,0.5)" stroke-width="1.5"/>
+              <text x="280" y="218" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8.5" font-family="DM Sans">Sub-3</text>
+              <circle cx="350" cy="200" r="13" fill="rgba(80,136,212,0.25)" stroke="rgba(80,136,212,0.5)" stroke-width="1.5"/>
+              <text x="350" y="218" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8.5" font-family="DM Sans">Sub-4</text>
+              <circle cx="470" cy="200" r="13" fill="rgba(80,136,212,0.25)" stroke="rgba(80,136,212,0.5)" stroke-width="1.5"/>
+              <text x="470" y="218" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8.5" font-family="DM Sans">Sub-5</text>
+              <circle cx="560" cy="200" r="13" fill="rgba(80,136,212,0.25)" stroke="rgba(80,136,212,0.5)" stroke-width="1.5"/>
+              <text x="560" y="218" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="8.5" font-family="DM Sans">Sub-6</text>
+              <!-- Legend -->
+              <circle cx="20" cy="230" r="6" fill="rgba(176,16,32,0.5)" stroke="rgba(176,16,32,0.8)" stroke-width="1.5"/>
+              <text x="30" y="234" fill="rgba(255,255,255,0.4)" font-size="9" font-family="DM Sans">L1 Affiliate</text>
+              <circle cx="120" cy="230" r="6" fill="rgba(201,168,76,0.3)" stroke="rgba(201,168,76,0.6)" stroke-width="1.5"/>
+              <text x="130" y="234" fill="rgba(255,255,255,0.4)" font-size="9" font-family="DM Sans">L2 Sub-Affiliate</text>
+              <circle cx="255" cy="230" r="6" fill="rgba(80,136,212,0.25)" stroke="rgba(80,136,212,0.5)" stroke-width="1.5"/>
+              <text x="265" y="234" fill="rgba(255,255,255,0.4)" font-size="9" font-family="DM Sans">L3 Sub-Affiliate</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════ NOTIFICATIONS ════════════════ -->
+      <div id="notifications" class="section">
+        <div class="sec-heading">
+          <div><div class="sec-title">Notifications & Broadcasts</div><div class="sec-sub">Send system messages to affiliates</div></div>
+          <div class="sec-actions"><button class="btn btn-primary" onclick="openModal('broadcast-modal')">📢 Send Broadcast</button></div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-title">Recent System Alerts</div>
+            <div class="activity-feed">
+              <div class="notif-item">
+                <div class="notif-dot-big" style="background:var(--warning)"></div>
+                <div><div style="font-size:13px;font-weight:500">12 payout requests require approval</div><div style="font-size:11px;color:var(--gray);margin-top:3px">Oldest: 3 days ago · Total: ₱ 84,320</div></div>
+                <button class="btn btn-xs btn-outline" style="margin-left:auto" onclick="showSection('payouts',document.querySelector('[onclick*=payouts]'))">Action</button>
+              </div>
+              <div class="notif-item">
+                <div class="notif-dot-big" style="background:var(--crimson-bright)"></div>
+                <div><div style="font-size:13px;font-weight:500">Suspicious link activity detected</div><div style="font-size:11px;color:var(--gray);margin-top:3px">Link CS-REF-01284 · 12,401 clicks, 0.06% CVR</div></div>
+                <button class="btn btn-xs btn-danger" onclick="showToast('🚫 Link blocked','error')" style="margin-left:auto">Block</button>
+              </div>
+              <div class="notif-item">
+                <div class="notif-dot-big" style="background:var(--gold)"></div>
+                <div><div style="font-size:13px;font-weight:500">7 new applications pending</div><div style="font-size:11px;color:var(--gray);margin-top:3px">Received in last 48 hours</div></div>
+                <button class="btn btn-xs btn-outline" style="margin-left:auto" onclick="showSection('applications',document.querySelector('[onclick*=applications]'))">Review</button>
+              </div>
+              <div class="notif-item">
+                <div class="notif-dot-big" style="background:var(--success)"></div>
+                <div><div style="font-size:13px;font-weight:500">Ana Gomez reached Platinum tier</div><div style="font-size:11px;color:var(--gray);margin-top:3px">1 hour ago · ₱ 150k monthly threshold achieved</div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Quick Broadcast</div>
+            <div class="form-group"><label class="form-label">Target Audience</label><select class="form-select"><option>All Affiliates</option><option>Platinum Only</option><option>Gold Only</option><option>Silver Only</option><option>Custom Segment</option></select></div>
+            <div class="form-group"><label class="form-label">Subject</label><input class="form-input" placeholder="Announcement subject…"></div>
+            <div class="form-group"><label class="form-label">Message</label><textarea class="form-textarea" placeholder="Write your message to affiliates…"></textarea></div>
+            <div class="form-group"><label class="form-label">Delivery Channel</label>
+              <div style="display:flex;gap:16px;margin-top:6px">
+                <label class="toggle-wrap"><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label><span class="toggle-label">Email</span></label>
+                <label class="toggle-wrap"><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label><span class="toggle-label">In-App</span></label>
+                <label class="toggle-wrap"><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label><span class="toggle-label">SMS</span></label>
+              </div>
+            </div>
+            <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="showToast('📢 Broadcast sent to all affiliates!')">📢 Send Broadcast</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════ SETTINGS ════════════════ -->
+      <div id="settings" class="section">
+        <div class="sec-heading">
+          <div><div class="sec-title">System Settings</div><div class="sec-sub">Platform configuration and admin preferences</div></div>
+          <div class="sec-actions"><button class="btn btn-primary" onclick="showToast('✅ Settings saved successfully')">💾 Save All</button></div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-title">Platform Configuration</div>
+            <div class="form-group"><label class="form-label">Platform Name</label><input class="form-input" value="Complete Sensation"></div>
+            <div class="form-group"><label class="form-label">Base URL</label><input class="form-input" value="https://completesensation.ph"></div>
+            <div class="form-group"><label class="form-label">Support Email</label><input class="form-input" value="support@completesensation.ph"></div>
+            <div class="form-group"><label class="form-label">Currency</label><select class="form-select"><option>PHP (₱)</option><option>USD ($)</option></select></div>
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px">
+              <label class="toggle-wrap"><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label><span class="toggle-label">Allow new affiliate signups</span></label>
+              <label class="toggle-wrap"><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label><span class="toggle-label">Require admin approval for applications</span></label>
+              <label class="toggle-wrap"><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label><span class="toggle-label">Enable sub-affiliate referral program</span></label>
+              <label class="toggle-wrap"><label class="toggle"><input type="checkbox"><span class="toggle-slider"></span></label><span class="toggle-label">Maintenance mode</span></label>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Admin Profile</div>
+            <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" value="Juan dela Cruz"></div>
+            <div class="form-group"><label class="form-label">Email</label><input class="form-input" value="admin@completesensation.ph"></div>
+            <div class="form-group"><label class="form-label">Role</label><input class="form-input" value="Super Administrator" disabled style="opacity:0.5"></div>
+            <div class="form-group"><label class="form-label">Current Password</label><input class="form-input" type="password" placeholder="Enter current password"></div>
+            <div class="form-group"><label class="form-label">New Password</label><input class="form-input" type="password" placeholder="New password"></div>
+            <button class="btn btn-primary" onclick="showToast('✅ Password updated')">Update Password</button>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="card-title">Payout Gateway Config</div>
+            <div class="form-group"><label class="form-label">GCash API Key</label><input class="form-input" type="password" value="gcash_live_xxxxxxxxxxxx"></div>
+            <div class="form-group"><label class="form-label">Maya API Key</label><input class="form-input" type="password" value="maya_live_xxxxxxxxxxxx"></div>
+            <div class="form-group"><label class="form-label">Bank Transfer Mode</label><select class="form-select"><option>Manual Approval</option><option>Auto-Process</option></select></div>
+            <button class="btn btn-outline" onclick="showToast('🔄 Gateway connection tested — ✅ Online')">Test Connection</button>
+          </div>
+          <div class="card">
+            <div class="card-title">Fraud Detection Settings</div>
+            <div class="form-group"><label class="form-label">Click Anomaly Threshold</label><input class="form-input" value="500 clicks/hour"></div>
+            <div class="form-group"><label class="form-label">Low CVR Alert (%)</label><input class="form-input" value="1%"></div>
+            <div style="display:flex;flex-direction:column;gap:12px;margin-top:4px">
+              <label class="toggle-wrap"><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label><span class="toggle-label">Auto-flag suspicious links</span></label>
+              <label class="toggle-wrap"><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label><span class="toggle-label">Block VPN/proxy clicks</span></label>
+              <label class="toggle-wrap"><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label><span class="toggle-label">Email admin on fraud alerts</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════ AUDIT LOG ════════════════ -->
+      <div id="audit" class="section">
+        <div class="sec-heading">
+          <div><div class="sec-title">Audit Log</div><div class="sec-sub">Complete record of all admin actions on the platform</div></div>
+          <div class="sec-actions">
+            <div class="search-bar"><span>🔍</span><input type="text" placeholder="Search actions…"></div>
+            <button class="btn btn-outline" onclick="showToast('📥 Audit log exported')">📥 Export</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Timestamp</th><th>Admin</th><th>Action</th><th>Target</th><th>Details</th><th>IP Address</th></tr></thead>
+            <tbody>
+              <tr><td class="td-mono" style="font-size:11px">2025-07-14 14:30:22</td><td>Juan dela Cruz</td><td><span class="badge badge-green">Approved</span></td><td>Payout #08284</td><td style="font-size:12px;color:var(--gray)">₱ 22,000 GCash · Ana Gomez</td><td class="td-mono" style="color:var(--gray)">192.168.x.x</td></tr>
+              <tr><td class="td-mono" style="font-size:11px">2025-07-14 11:15:09</td><td>Juan dela Cruz</td><td><span class="badge badge-red">Flagged</span></td><td>Link CS-REF-01284</td><td style="font-size:12px;color:var(--gray)">Unusual click volume detected</td><td class="td-mono" style="color:var(--gray)">192.168.x.x</td></tr>
+              <tr><td class="td-mono" style="font-size:11px">2025-07-14 09:04:17</td><td>Juan dela Cruz</td><td><span class="badge badge-blue">Approved</span></td><td>Application #0088</td><td style="font-size:12px;color:var(--gray)">New affiliate: Pedro Navarro</td><td class="td-mono" style="color:var(--gray)">192.168.x.x</td></tr>
+              <tr><td class="td-mono" style="font-size:11px">2025-07-13 16:22:55</td><td>Juan dela Cruz</td><td><span class="badge badge-warn">Updated</span></td><td>Tier Settings</td><td style="font-size:12px;color:var(--gray)">Gold threshold: ₱50k → ₱50k (no change)</td><td class="td-mono" style="color:var(--gray)">192.168.x.x</td></tr>
+              <tr><td class="td-mono" style="font-size:11px">2025-07-13 10:08:31</td><td>Juan dela Cruz</td><td><span class="badge badge-red">Suspended</span></td><td>Affiliate Jose Luna</td><td style="font-size:12px;color:var(--gray)">Policy violation: multiple accounts</td><td class="td-mono" style="color:var(--gray)">192.168.x.x</td></tr>
+              <tr><td class="td-mono" style="font-size:11px">2025-07-12 08:44:12</td><td>Juan dela Cruz</td><td><span class="badge badge-green">Added</span></td><td>Product CS PRO</td><td style="font-size:12px;color:var(--gray)">New product added · SKU: CS-PRO-300</td><td class="td-mono" style="color:var(--gray)">192.168.x.x</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div><!-- /layout -->
+
+<!-- ══ MODAL: View Affiliate ══ -->
+<div class="modal-overlay" id="view-affiliate-modal" onclick="closeModal('view-affiliate-modal')">
+  <div class="modal modal-lg" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal('view-affiliate-modal')">×</button>
+    <div class="modal-title">Maria Santos</div>
+    <div class="modal-sub">CS-2024-00842 · Gold Reseller · Active since March 2024</div>
+    <div class="form-row" style="margin-bottom:16px">
+      <div class="highlight-box"><div style="font-size:10px;color:var(--gray);margin-bottom:4px">MTD SALES</div><div style="font-family:'Bebas Neue';font-size:26px;color:var(--success-light)">₱ 98,600</div></div>
+      <div class="highlight-box gold"><div style="font-size:10px;color:var(--gray);margin-bottom:4px">MTD COMMISSION</div><div style="font-family:'Bebas Neue';font-size:26px;color:var(--gold-light)">₱ 14,790</div></div>
+      <div class="highlight-box green"><div style="font-size:10px;color:var(--gray);margin-bottom:4px">AVAILABLE BALANCE</div><div style="font-family:'Bebas Neue';font-size:26px;color:var(--success-light)">₱ 6,240</div></div>
+    </div>
+    <div class="form-row">
+      <div><div class="form-group"><label class="form-label">Email</label><input class="form-input" value="maria.santos@email.com" readonly></div></div>
+      <div><div class="form-group"><label class="form-label">Mobile</label><input class="form-input" value="0917 XXX 8421" readonly></div></div>
+    </div>
+    <div class="form-group"><label class="form-label">Current Tier</label><select class="form-select"><option>Silver</option><option selected>Gold</option><option>Platinum</option></select></div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-green" style="flex:1;justify-content:center" onclick="showToast('✅ Changes saved for Maria Santos');closeModal('view-affiliate-modal')">💾 Save Changes</button>
+      <button class="btn btn-danger" onclick="showToast('⚠️ Account suspended','warn');closeModal('view-affiliate-modal')">Suspend</button>
+      <button class="btn btn-outline" onclick="closeModal('view-affiliate-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Add Affiliate ══ -->
+<div class="modal-overlay" id="add-affiliate-modal" onclick="closeModal('add-affiliate-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal('add-affiliate-modal')">×</button>
+    <div class="modal-title">Add New Affiliate</div>
+    <div class="modal-sub">Manually register an affiliate to the platform</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" placeholder="Full name"></div>
+      <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" placeholder="email@example.com"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Mobile Number</label><input class="form-input" placeholder="09XX XXX XXXX"></div>
+      <div class="form-group"><label class="form-label">Affiliate Type</label><select class="form-select"><option>Reseller</option><option>Distributor</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Starting Tier</label><select class="form-select"><option>Silver</option><option>Gold</option><option>Platinum</option></select></div>
+      <div class="form-group"><label class="form-label">Referred By (ID)</label><input class="form-input" placeholder="CS-XXXX-XXXXX (optional)"></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="showToast('✅ Affiliate added successfully!');closeModal('add-affiliate-modal')">✓ Create Affiliate Account</button>
+  </div>
+</div>
+
+<!-- ══ MODAL: Application Detail ══ -->
+<div class="modal-overlay" id="application-modal" onclick="closeModal('application-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal('application-modal')">×</button>
+    <div class="modal-title">Application: Ricardo Reyes</div>
+    <div class="modal-sub">Submitted Jul 14, 2025 · Referred by CS-2024-00012 (Ana Gomez)</div>
+    <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" value="Ricardo Reyes" readonly></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" value="ricardo.r@email.com" readonly></div>
+      <div class="form-group"><label class="form-label">Mobile</label><input class="form-input" value="0917-444-1234" readonly></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Type</label><input class="form-input" value="Reseller" readonly></div>
+      <div class="form-group"><label class="form-label">Location</label><input class="form-input" value="Quezon City, Metro Manila" readonly></div>
+    </div>
+    <div class="form-group"><label class="form-label">Admin Notes</label><textarea class="form-textarea" placeholder="Add review notes here…"></textarea></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-green" style="flex:1;justify-content:center" onclick="showToast('✅ Application approved!');closeModal('application-modal')">✓ Approve</button>
+      <button class="btn btn-danger" onclick="showToast('❌ Application rejected','error');closeModal('application-modal')">Reject</button>
+      <button class="btn btn-outline" onclick="closeModal('application-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Add Product ══ -->
+<div class="modal-overlay" id="add-product-modal" onclick="closeModal('add-product-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal('add-product-modal')">×</button>
+    <div class="modal-title">Add New Product</div>
+    <div class="modal-sub">Create a new product for affiliates to promote</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Product Name</label><input class="form-input" placeholder="e.g. CS ULTRA"></div>
+      <div class="form-group"><label class="form-label">SKU</label><input class="form-input" placeholder="CS-XXXX-000"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Price (₱)</label><input class="form-input" type="number" placeholder="1999"></div>
+      <div class="form-group"><label class="form-label">Commission Rate (%)</label><input class="form-input" type="number" placeholder="15"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Initial Stock</label><input class="form-input" type="number" placeholder="500"></div>
+      <div class="form-group"><label class="form-label">Status</label><select class="form-select"><option>Active</option><option>Draft</option><option>Inactive</option></select></div>
+    </div>
+    <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" placeholder="Product description for affiliates…"></textarea></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="showToast('✅ Product created successfully!');closeModal('add-product-modal')">✓ Add Product</button>
+  </div>
+</div>
+
+<!-- ══ MODAL: Edit Product ══ -->
+<div class="modal-overlay" id="edit-product-modal" onclick="closeModal('edit-product-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal('edit-product-modal')">×</button>
+    <div class="modal-title">Edit Product · CS GODX</div>
+    <div class="modal-sub">SKU: CS-GODX-200 · Created Jan 2024</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Product Name</label><input class="form-input" value="CS GODX"></div>
+      <div class="form-group"><label class="form-label">SKU</label><input class="form-input" value="CS-GODX-200"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Price (₱)</label><input class="form-input" value="1999"></div>
+      <div class="form-group"><label class="form-label">Commission Rate (%)</label><input class="form-input" value="15"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Current Stock</label><input class="form-input" value="342"></div>
+      <div class="form-group"><label class="form-label">Status</label><select class="form-select"><option selected>Active</option><option>Inactive</option></select></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px">
+      <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="showToast('✅ Product updated!');closeModal('edit-product-modal')">💾 Save</button>
+      <button class="btn btn-danger" onclick="showToast('🗑️ Product deactivated','error');closeModal('edit-product-modal')">Deactivate</button>
+      <button class="btn btn-outline" onclick="closeModal('edit-product-modal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL: Broadcast ══ -->
+<div class="modal-overlay" id="broadcast-modal" onclick="closeModal('broadcast-modal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal('broadcast-modal')">×</button>
+    <div class="modal-title">Send Broadcast</div>
+    <div class="modal-sub">Message all or selected affiliates</div>
+    <div class="form-group"><label class="form-label">Recipients</label><select class="form-select"><option>All Affiliates (1,248)</option><option>Platinum Only (48)</option><option>Gold Only (356)</option><option>Silver Only (844)</option></select></div>
+    <div class="form-group"><label class="form-label">Subject</label><input class="form-input" placeholder="Message subject…"></div>
+    <div class="form-group"><label class="form-label">Message</label><textarea class="form-textarea" placeholder="Write your announcement…" style="min-height:120px"></textarea></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="showToast('📢 Broadcast sent to 1,248 affiliates!');closeModal('broadcast-modal')">📢 Send Now</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon" id="toast-icon">✅</span>
+  <span id="toast-msg"></span>
+</div>
+
+<script>
+  function showSection(id, el) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const sec = document.getElementById(id);
+    if(sec) sec.classList.add('active');
+    if(el) el.classList.add('active');
+    const titles = {
+      overview: ['Admin Dashboard', 'Complete Sensation · Admin Console · Last synced: just now'],
+      analytics: ['Analytics & Reports', 'Platform-wide performance metrics and trend analysis'],
+      affiliates: ['All Affiliates', '1,248 affiliates across all tiers'],
+      applications: ['Affiliate Applications', '7 pending applications awaiting review'],
+      payouts: ['Payout Requests', '12 requests pending · Total: ₱ 84,320'],
+      commissions: ['Commission Ledger', 'Full commission history and management'],
+      orders: ['Sales & Orders', '8,914 orders this month'],
+      products: ['Product Management', 'Manage products for affiliate promotion'],
+      tiers: ['Tier Management', 'Configure commission tiers and thresholds'],
+      links: ['Affiliate Links', 'Track and manage all affiliate tracking links'],
+      transactions: ['Transaction History', 'Full audit trail of all platform transactions'],
+      network: ['Affiliate Network Map', 'Visualize referral trees and relationships'],
+      notifications: ['Notifications & Broadcasts', 'System alerts and affiliate messaging'],
+      settings: ['System Settings', 'Platform configuration and admin preferences'],
+      audit: ['Audit Log', 'Complete record of all admin actions'],
+    };
+    if(titles[id]) {
+      document.getElementById('page-title').textContent = titles[id][0];
+      document.getElementById('page-sub').textContent = titles[id][1];
+    }
+  }
+
+  function openModal(id) { document.getElementById(id).classList.add('show'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+  let toastTimer;
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    const icon = document.getElementById('toast-icon');
+    document.getElementById('toast-msg').textContent = msg;
+    t.className = 'toast';
+    if(type === 'error') { t.classList.add('error'); icon.textContent = '❌'; }
+    else if(type === 'warn') { t.classList.add('warn'); icon.textContent = '⚠️'; }
+    else { icon.textContent = '✅'; }
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+  }
+
+  function updateTitle(t,s) {
+    document.getElementById('page-title').textContent = t;
+    document.getElementById('page-sub').textContent = s;
+  }
+
+  // Animate bars on load
+  window.addEventListener('load', () => {
+    document.querySelectorAll('.bar').forEach((b, i) => {
+      const h = b.style.height;
+      b.style.height = '0';
+      setTimeout(() => { b.style.height = h; }, 150 + i * 80);
+    });
+    document.querySelectorAll('.progress-fill').forEach((p, i) => {
+      const w = p.style.width;
+      p.style.width = '0';
+      setTimeout(() => { p.style.width = w; }, 400 + i * 60);
+    });
+  });
+</script>
+</body>
+</html>
